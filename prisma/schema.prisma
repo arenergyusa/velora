@@ -15,7 +15,7 @@ model User {
   teamSide      TeamSide?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
-  nonce         String           @default(uuid())
+  nonce         String           @default(dbgenerated("gen_random_uuid()::text"))
   deposits      Deposit[]
   earnings      Earning[]
   salaries      SalaryTracking[]

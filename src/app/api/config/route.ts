@@ -4,19 +4,19 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   try {
     const configs = await prisma.systemConfig.findMany()
-    const configMap = configs.reduce((acc: Record<string, string>, curr) => {
+    const configMap = configs.reduce((acc: Record<string, string>, curr: { key: string; value: string }) => {
       acc[curr.key] = curr.value
       return acc
     }, {})
-    
+
     const plans = await prisma.planConfig.findMany({
       where: { isActive: true },
       orderBy: { minDepositUsd: 'asc' }
     })
 
-    return NextResponse.json({ 
-      success: true, 
-      masterWallet: configMap['platform_wallet_address'] || 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+    return NextResponse.json({
+      success: true,
+      masterWallet: configMap['platform_wallet_address'] || '0x1F0f0980feE31EC75F188f16F1d5C7001395D3C1',
       minWithdrawalUsd: Number(configMap['min_withdrawal_usd']) || 10,
       withdrawalFeePct: Number(configMap['withdrawal_fee_pct']) || 10,
       plans: plans.map(p => ({

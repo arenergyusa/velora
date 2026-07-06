@@ -87,32 +87,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Transferred amount is less than expected' }, { status: 400 })
       }
 
-      // Enhanced Verification using BscScan API
-      if (process.env.BSCSCAN_API_KEY) {
-        try {
-          const bscscanUrl = `https://api.bscscan.com/api?module=account&action=tokentx&address=${masterWallet}&page=1&offset=50&sort=desc&apikey=${process.env.BSCSCAN_API_KEY}`
-          const bscRes = await fetch(bscscanUrl)
-          const bscData = await bscRes.json()
-          
-          if (bscData.status === '1' && Array.isArray(bscData.result)) {
-            const bscTx = bscData.result.find((t: any) => t.hash.toLowerCase() === txHash.toLowerCase())
-            
-            if (bscTx) {
-              if (bscTx.to.toLowerCase() !== masterWallet.toLowerCase() || bscTx.from.toLowerCase() !== user.walletAddress.toLowerCase()) {
-                 return NextResponse.json({ error: 'BscScan verification failed: address mismatch' }, { status: 400 })
-              }
-              const bscAmount = BigInt(bscTx.value)
-              if (bscAmount < (expectedWei - margin)) {
-                return NextResponse.json({ error: 'BscScan verification failed: amount mismatch' }, { status: 400 })
-              }
-            } else {
-              console.warn(`TX ${txHash} not found in BscScan yet, relying on RPC verification.`)
-            }
-          }
-        } catch (bscError) {
-          console.error('BscScan verification warning:', bscError)
-        }
-      }
+      // Note: BscScan verification was removed as the V1 API is deprecated 
+      // and Etherscan V2 API requires a paid plan for BSC network. 
+      // The RPC verification above is fully sufficient.
 
     } catch (verifyError) {
       console.error('BSC verification failed:', verifyError)
