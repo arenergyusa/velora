@@ -19,7 +19,7 @@ export async function GET() {
       masterWallet: configMap['platform_wallet_address'] || '0x1F0f0980feE31EC75F188f16F1d5C7001395D3C1',
       minWithdrawalUsd: Number(configMap['min_withdrawal_usd']) || 10,
       withdrawalFeePct: Number(configMap['withdrawal_fee_pct']) || 10,
-      plans: plans.map(p => ({
+      plans: plans.map((p: any) => ({
         id: p.id,
         name: p.name,
         min: Number(p.minDepositUsd),
