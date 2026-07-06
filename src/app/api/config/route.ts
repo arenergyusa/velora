@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   try {
     const configs = await prisma.systemConfig.findMany()
-    const configMap = configs.reduce((acc, curr) => {
+    const configMap = configs.reduce((acc: Record<string, string>, curr) => {
       acc[curr.key] = curr.value
       return acc
-    }, {} as Record<string, string>)
+    }, {})
     
     const plans = await prisma.planConfig.findMany({
       where: { isActive: true },
