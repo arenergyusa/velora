@@ -29,7 +29,7 @@ export default function HelpSupport() {
     },
     {
       title: 'Troubleshooting Tips',
-      description: "Wallet not connecting? Page not loading? Don&apos;t worry — most issues have quick fixes. Check these common solutions first.",
+      description: "Wallet not connecting? Page not loading? Don't worry — most issues have quick fixes. Check these common solutions first.",
       icon: <HelpCircle className="w-5 h-5 text-indigo-600" />
     }
   ];

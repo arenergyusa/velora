@@ -53,7 +53,7 @@ export default function TopUpClient({
   }
 
   const handleInvest = async () => {
-    if (!selectedPlan || !amountUsd || !userData?.id) {
+    if (!selectedPlan || !amountUsd || !userData?.id || !activePlanDetails) {
       toast.error('Missing details or user not loaded.')
       return
     }
@@ -61,8 +61,8 @@ export default function TopUpClient({
     const amount = parseFloat(amountUsd)
     const isUnlimited = !activePlanDetails.max || activePlanDetails.max === 100000 || activePlanDetails.max === 0;
 
-    if (amount < activePlanDetails!.min || (!isUnlimited && amount > activePlanDetails!.max)) {
-      toast.error(`Amount must be between $${activePlanDetails!.min} and ${isUnlimited ? 'Unlimited' : `$${activePlanDetails!.max}`}`)
+    if (amount < activePlanDetails.min || (!isUnlimited && amount > activePlanDetails.max!)) {
+      toast.error(`Amount must be between $${activePlanDetails.min} and ${isUnlimited ? 'Unlimited' : `$${activePlanDetails.max}`}`)
       return
     }
 

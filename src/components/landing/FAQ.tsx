@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     question: "Are my deposits locked?",
-    answer: "Your initial deposit acts as your tier activation and contributes to overall liquidity. While the principal isn&apos;t withdrawn directly, your daily rewards and community bonuses are fully liquid and can be withdrawn at any time."
+    answer: "Your initial deposit acts as your tier activation and contributes to overall liquidity. While the principal isn't withdrawn directly, your daily rewards and community bonuses are fully liquid and can be withdrawn at any time."
   }
 ];
 
