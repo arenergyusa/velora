@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AccountStatus {
+  INACTIVE
+  ACTIVE
+  WORKING
+}
+
+enum TeamSide {
+  LEFT
+  RIGHT
+}
+
+enum TxStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+enum EarningType {
+  ROI
+  LEVEL_COMMISSION
+  SALARY
+}
+
+model User {
+  id             String         @id @default(uuid())
+  walletAddress  String         @unique
+  referralCode   String         @unique
+  referredBy     String?
+  nonce          String         @default(uuid())
+  status         AccountStatus  @default(INACTIVE)
+  teamSide       TeamSide?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  deposits       Deposit[]
+  withdrawals    Withdrawal[]
+  earnings       Earning[]
+  cycles         UserCycle[]
+  salaries       SalaryTracking[]
+
+  @@index([referredBy])
+}
+
+model Deposit {
+  id             String    @id @default(uuid())
+  userId         String
+  amountUsd      Decimal
+  amountTrx      Decimal
+  trxPriceUsd    Decimal
+  txHash         String?   @unique
+  planId         String
+  cycleNumber    Int       @default(1)
+  status         TxStatus  @default(PENDING)
+  createdAt      DateTime  @default(now())
+
+  user           User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Withdrawal {
+  id             String    @id @default(uuid())
+  userId         String
+  amountUsd      Decimal
+  amountTrx      Decimal
+  trxPriceUsd    Decimal
+  txHash         String?
+  status         TxStatus  @default(PENDING)
+  createdAt      DateTime  @default(now())
+
+  user           User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Earning {
+  id             String      @id @default(uuid())
+  userId         String
+  type           EarningType
+  amountUsd      Decimal
+  sourceUserId   String?
+  level          Int?
+  cycleNumber    Int
+  description    String?
+  createdAt      DateTime    @default(now())
+
+  user           User        @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model UserCycle {
+  id             String    @id @default(uuid())
+  userId         String
+  cycleNumber    Int
+  depositUsd     Decimal
+  planId         String
+  totalEarned    Decimal   @default(0)
+  maxEarning     Decimal
+  status         String    @default("ACTIVE") // ACTIVE, CAPPED, RETOPED
+  startedAt      DateTime  @default(now())
+  cappedAt       DateTime?
+
+  user           User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model SalaryTracking {
+  id             String    @id @default(uuid())
+  userId         String
+  month          DateTime
+  leftTeamBiz    Decimal   @default(0)
+  rightTeamBiz   Decimal   @default(0)
+  requiredBiz    Decimal
+  isEligible     Boolean   @default(false)
+  amountUsd      Decimal
+  status         String    @default("PENDING") // PENDING, PAID, SKIPPED
+  createdAt      DateTime  @default(now())
+
+  user           User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model PlanConfig {
+  id             String    @id @default(uuid())
+  name           String
+  minDepositUsd  Decimal
+  maxDepositUsd  Decimal?
+  monthlyRoiPct  Decimal
+  isActive       Boolean   @default(true)
+  sortOrder      Int
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model LevelConfig {
+  id             String    @id @default(uuid())
+  level          Int       @unique
+  commissionPct  Decimal
+  isActive       Boolean   @default(true)
+  updatedAt      DateTime  @updatedAt
+}
+
+model SystemConfig {
+  id             String    @id @default(uuid())
+  key            String    @unique
+  value          String
+  description    String?
+  updatedAt      DateTime  @updatedAt
+}

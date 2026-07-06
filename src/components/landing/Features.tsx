@@ -1,0 +1,58 @@
+'use client'
+
+import { Lock, Zap, Heart, Globe } from 'lucide-react'
+
+const features = [
+  {
+    icon: <Lock className="w-6 h-6 text-sky-600" />,
+    title: 'Your Identity Stays Yours',
+    description: "No passwords to remember, no email signups. Just connect your wallet and you're in. We believe your digital identity should be in your hands — not ours."
+  },
+  {
+    icon: <Zap className="w-6 h-6 text-emerald-600" />,
+    title: 'Built for Speed & Simplicity',
+    description: "Every interaction is designed to be fast and intuitive. Whether you're checking your dashboard or inviting a friend, things just work — no friction, no confusion."
+  },
+  {
+    icon: <Heart className="w-6 h-6 text-indigo-600" />,
+    title: 'Community First, Always',
+    description: "Velora grows because people share it with people they trust. We've built everything around that idea — a platform where your community genuinely benefits alongside you."
+  },
+  {
+    icon: <Globe className="w-6 h-6 text-amber-600" />,
+    title: 'Works Everywhere You Do',
+    description: "On the bus, at a café, or at your desk — Velora looks and feels great on every screen. We obsess over the small details so you don't have to."
+  }
+];
+
+export function Features() {
+  return (
+    <section id="features" className="py-20 bg-white border-y border-slate-200/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+          <h2 className="text-xs font-bold tracking-wider text-sky-700 uppercase">Why People Choose Us</h2>
+          <p className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            A platform that respects your time and trust
+          </p>
+          <p className="text-slate-500 text-base leading-relaxed">
+            We didn't build Velora to impress — we built it to be useful. Here's what makes it different from everything else out there.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+          {features.map((feature, i) => (
+            <div key={i} className="flex flex-col sm:flex-row gap-5 glass-card p-6 rounded-2xl border border-slate-100 hover:border-slate-200 transition-all">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
+                {feature.icon}
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-slate-900">{feature.title}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">{feature.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}

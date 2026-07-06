@@ -1,0 +1,273 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { ArrowRight, RefreshCw, Layers, ShieldCheck, DollarSign, Wallet } from 'lucide-react'
+import { toast } from 'sonner'
+import useSWR, { mutate } from 'swr'
+import { useWallet } from '@/context/WalletContext'
+import { useRouter } from 'next/navigation'
+
+export default function TopUpClient({
+  fallbackStats,
+  fallbackPlans,
+  serverAddress
+}: {
+  fallbackStats?: any,
+  fallbackPlans?: any[],
+  serverAddress?: string
+}) {
+  const { address, isConnected } = useWallet()
+  const router = useRouter()
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
+  const [amountUsd, setAmountUsd] = useState<string>('')
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const activeAddress = (isConnected && address) || serverAddress
+
+  const { data: resData, mutate: mutateStats, isLoading: isLoadingStats } = useSWR(
+    activeAddress ? `/api/user/stats?address=${activeAddress}` : null,
+    (url: string) => fetch(url).then(res => res.json()),
+    { fallbackData: fallbackStats, revalidateOnFocus: false }
+  )
+
+  const userData = resData?.success ? resData.user : null
+  const availableBalance = resData?.success ? resData.stats.availableBalanceUsd : 0
+
+  const { data: configData, isLoading: isLoadingConfigData } = useSWR(
+    '/api/config',
+    (url: string) => fetch(url).then(res => res.json()),
+    { fallbackData: { success: true, plans: fallbackPlans }, revalidateOnFocus: false }
+  )
+
+  const plans = configData?.success ? configData.plans : []
+  const isLoadingConfig = !fallbackPlans && isLoadingConfigData
+
+  const activePlanDetails = plans.find((p: any) => p.id === selectedPlan)
+
+  const handleMax = () => {
+    if (activePlanDetails) {
+      const isUnlimited = !activePlanDetails.max || activePlanDetails.max === 100000 || activePlanDetails.max === 0;
+      const maxAllowed = isUnlimited ? availableBalance : Math.min(availableBalance, activePlanDetails.max)
+      setAmountUsd(maxAllowed.toString())
+    }
+  }
+
+  const handleInvest = async () => {
+    if (!selectedPlan || !amountUsd || !userData?.id) {
+      toast.error('Missing details or user not loaded.')
+      return
+    }
+
+    const amount = parseFloat(amountUsd)
+    const isUnlimited = !activePlanDetails.max || activePlanDetails.max === 100000 || activePlanDetails.max === 0;
+
+    if (amount < activePlanDetails!.min || (!isUnlimited && amount > activePlanDetails!.max)) {
+      toast.error(`Amount must be between $${activePlanDetails!.min} and ${isUnlimited ? 'Unlimited' : `$${activePlanDetails!.max}`}`)
+      return
+    }
+
+    if (amount > availableBalance) {
+      toast.error('Insufficient internal balance. Please add funds.')
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      const res = await fetch('/api/topup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userData.id,
+          planId: selectedPlan,
+          amountUsd: amount
+        })
+      })
+
+      const result = await res.json()
+
+      if (result.success) {
+        toast.success(`Successfully invested $${amount.toFixed(2)} in ${activePlanDetails?.name}!`)
+
+        // Optimistic UI Update: Deduct balance locally before refetching
+        mutateStats(
+          (prev: any) => {
+            if (!prev || !prev.stats) return prev;
+            return {
+              ...prev,
+              stats: {
+                ...prev.stats,
+                availableBalanceUsd: prev.stats.availableBalanceUsd - amount,
+                activeDepositUsd: prev.stats.activeDepositUsd + amount,
+                activePlan: activePlanDetails?.name || prev.stats.activePlan
+              }
+            }
+          },
+          false // Don't revalidate immediately
+        )
+
+        setAmountUsd('')
+        setSelectedPlan(null)
+        // Global update
+        mutate(`/api/team?address=${address}`)
+        router.refresh()
+      } else {
+        toast.error(result.error || 'Failed to process investment')
+      }
+    } catch (error: any) {
+      console.error(error)
+      toast.error('An error occurred during investment.')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  if (isLoadingConfig) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <RefreshCw className="h-8 w-8 animate-spin text-sky-500" />
+          <p className="text-slate-500 font-medium">Loading investment plans...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6 sm:space-y-8 animate-fade-in pb-24 md:pb-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Top-up
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Choose a plan to top-up using your available balance.
+          </p>
+        </div>
+
+        {/* Internal Balance Card */}
+        <div className="flex items-center space-x-4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm w-fit">
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
+            <Wallet className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Balance</div>
+            <div className="text-lg font-black text-slate-800">
+              ${availableBalance.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        {plans.length === 0 ? (
+          <div className="col-span-3 text-center text-slate-500 py-8">No active plans available</div>
+        ) : plans.map((plan: any) => (
+          <div
+            key={plan.id}
+            className={`glass-card bg-white border rounded-3xl p-6 transition-all cursor-pointer group ${selectedPlan === plan.id
+              ? 'border-indigo-400 ring-4 ring-indigo-500/10 shadow-md transform -translate-y-1'
+              : 'border-slate-200/60 hover:border-indigo-300 hover:shadow-sm'
+              }`}
+            onClick={() => setSelectedPlan(plan.id)}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className={`p-3 rounded-2xl ${selectedPlan === plan.id ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-500'} transition-colors`}>
+                <Layers className="w-6 h-6" />
+              </div>
+              {selectedPlan === plan.id && (
+                <div className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-lg">Selected</div>
+              )}
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
+            <p className="text-indigo-600 font-bold mt-1 text-sm">{plan.roi}% Monthly ROI</p>
+
+            <div className="mt-6 pt-4 border-t border-slate-100">
+              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Deposit Range</div>
+              <div className="text-lg font-black text-slate-800">
+                ${plan.min} - {(!plan.max || plan.max === 100000 || plan.max === 0) ? 'Unlimited' : `$${plan.max}`}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {selectedPlan && (
+        <div className="glass-card bg-white border border-slate-200/60 rounded-3xl p-6 sm:p-8 shadow-sm max-w-2xl mx-auto mt-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+            <ShieldCheck className="w-48 h-48 text-indigo-900" />
+          </div>
+
+          <div className="relative z-10">
+            <h3 className="text-xl font-bold tracking-tight text-slate-900 mb-2 flex items-center gap-2">
+              <Layers className="w-5 h-5 text-indigo-500" />
+              Activate {activePlanDetails?.name}
+            </h3>
+            <p className="text-slate-500 text-sm mb-6">
+              Enter the USD amount you want to top-up. This will be deducted from your available balance.
+            </p>
+
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <label htmlFor="amount" className="text-sm font-bold text-slate-700">
+                    Top-up Amount (USD)
+                  </label>
+                  <button
+                    onClick={handleMax}
+                    className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md hover:bg-indigo-100 transition-colors"
+                  >
+                    Max Allowed
+                  </button>
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <DollarSign className="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                  </div>
+                  <input
+                    id="amount"
+                    type="number"
+                    className="block w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    placeholder={`Min: $${activePlanDetails?.min}`}
+                    value={amountUsd}
+                    onChange={(e) => setAmountUsd(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 flex justify-between items-center text-sm">
+                <span className="text-slate-600 font-medium">Your Balance</span>
+                <span className={`font-bold ${availableBalance < parseFloat(amountUsd || '0') ? 'text-rose-500' : 'text-slate-900'}`}>
+                  ${availableBalance.toFixed(2)}
+                </span>
+              </div>
+
+              <button
+                onClick={handleInvest}
+                disabled={!amountUsd || isProcessing || parseFloat(amountUsd) > availableBalance}
+                className="w-full relative group overflow-hidden rounded-2xl bg-indigo-600 text-white font-bold text-base py-4 px-6 transition-all hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-xl active:scale-[0.98]"
+              >
+                <div className="relative flex items-center justify-center gap-2 z-10">
+                  {isProcessing ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 animate-spin text-indigo-200" />
+                      <span>Activating Plan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Top-up Now</span>
+                      <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
