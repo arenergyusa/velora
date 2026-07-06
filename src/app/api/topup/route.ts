@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     })
 
     // 6. Distribute 10-level commissions upwards
-    await distributeLevelCommissions(userId, amount, newCycleNumber)
+    await distributeLevelCommissions(userId, amount)
 
     return NextResponse.json({ success: true, cycle: newCycle })
 

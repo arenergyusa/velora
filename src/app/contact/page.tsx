@@ -24,7 +24,7 @@ export default function Contact() {
           <div className="space-y-8 animate-fade-in">
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Talk to Us</h1>
-              <p className="text-slate-500 text-sm">Whether you have a question, feedback, or just want to say hello — we'd love to hear from you. Our team typically responds within a few hours.</p>
+              <p className="text-slate-500 text-sm">Whether you have a question, feedback, or just want to say hello — we&apos;d love to hear from you. Our team typically responds within a few hours.</p>
             </div>
 
             <div className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm">

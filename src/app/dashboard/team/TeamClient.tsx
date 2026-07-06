@@ -1,17 +1,17 @@
 'use client'
 
 import useSWR from 'swr'
-import { Users, GitCommitVertical, BadgePercent, RefreshCw, Network, ArrowRight } from 'lucide-react'
+import { GitCommitVertical, BadgePercent, RefreshCw, ArrowRight } from 'lucide-react'
 import { useWallet } from '@/context/WalletContext'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-export default function TeamClient({ fallbackData, serverAddress }: { fallbackData?: any, serverAddress?: string }) {
+export default function TeamClient({ fallbackData, serverAddress }: { fallbackData?: unknown, serverAddress?: string }) {
   const { address, isConnected } = useWallet()
 
   const activeAddress = (isConnected && address) || serverAddress
 
-  const { data: resData, error, isLoading } = useSWR(
+  const { data: resData, isLoading } = useSWR(
     activeAddress ? `/api/team?address=${activeAddress}` : null,
     fetcher,
     {
@@ -51,7 +51,7 @@ export default function TeamClient({ fallbackData, serverAddress }: { fallbackDa
     )
   }
 
-  const { directReferrals, levelStats, leftBiz, rightBiz } = teamData
+  const { levelStats, leftBiz, rightBiz } = teamData
   const totalBiz = leftBiz + rightBiz
   const leftPct = totalBiz > 0 ? ((leftBiz / totalBiz) * 100).toFixed(1) : '0.0'
   const rightPct = totalBiz > 0 ? ((rightBiz / totalBiz) * 100).toFixed(1) : '0.0'
@@ -150,7 +150,7 @@ export default function TeamClient({ fallbackData, serverAddress }: { fallbackDa
               </div>
             ) : (
               <div className="space-y-2 min-w-[350px]">
-                {levelStats.map((stat: any) => (
+                {levelStats.map((stat: { level: number; users: number; commission: number }) => (
                   <div key={stat.level} className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:border-slate-300 transition-colors group">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-black group-hover:bg-amber-100 group-hover:text-amber-700 transition-colors">

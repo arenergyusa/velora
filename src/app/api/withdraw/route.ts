@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       const priceRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=TRXUSDT')
       const priceData = await priceRes.json()
       if (priceData && priceData.price) trxPriceUsd = parseFloat(priceData.price)
-    } catch (e) {
+    } catch {
       console.error('Failed to fetch TRX price for withdrawal, using fallback.')
     }
 
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
         throw new Error('Transaction failed on the network')
       }
       txHash = tx.hash
-    } catch (txError: any) {
+    } catch (txError: unknown) {
       console.error('Withdrawal Transaction Error:', txError)
       return NextResponse.json({ error: 'Blockchain transaction failed' }, { status: 500 })
     }

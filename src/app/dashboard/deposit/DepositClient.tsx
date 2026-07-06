@@ -1,19 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowDownToLine, RefreshCw, Wallet, DollarSign, Coins, ShieldCheck, CheckCircle2 } from 'lucide-react'
+import { ArrowDownToLine, RefreshCw, DollarSign, Coins, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import useSWR, { mutate } from 'swr'
 import { useWallet } from '@/context/WalletContext'
-import { BrowserProvider, parseUnits, Contract, isAddress } from 'ethers'
+import { BrowserProvider, parseUnits, Contract, isAddress, Eip1193Provider } from 'ethers'
 
 export default function DepositClient({
   fallbackStats,
   fallbackConfig,
   serverAddress
 }: {
-  fallbackStats?: any,
-  fallbackConfig?: any,
+  fallbackStats?: unknown,
+  fallbackConfig?: unknown,
   serverAddress?: string
 }) {
   const { address, isConnected } = useWallet()
@@ -26,7 +26,7 @@ export default function DepositClient({
   const activeAddress = (isConnected && address) || serverAddress
 
   // SWR for user stats
-  const { data: resData, mutate: mutateStats } = useSWR(
+  const { data: resData } = useSWR(
     activeAddress ? `/api/user/stats?address=${activeAddress}` : null,
     (url: string) => fetch(url).then(res => res.json()),
     { fallbackData: fallbackStats, revalidateOnFocus: false }
@@ -80,14 +80,14 @@ export default function DepositClient({
     }
 
     // Check if MetaMask/browser wallet is available
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
+    if (typeof window === 'undefined' || !(window as unknown as { ethereum: unknown }).ethereum) {
       toast.error('MetaMask or a compatible wallet not detected in browser.')
       return
     }
 
     setIsProcessing(true)
     try {
-      const provider = new BrowserProvider((window as any).ethereum)
+      const provider = new BrowserProvider((window as unknown as { ethereum: Eip1193Provider }).ethereum)
       const signer = await provider.getSigner()
 
       // ERC20 Transfer for Binance-Peg TRX on BSC
@@ -146,9 +146,9 @@ export default function DepositClient({
         toast.error(result.error || 'Failed to save deposit record', { id: 'tx-toast' })
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error)
-      const msg = error?.message || 'Transaction failed or rejected'
+      const msg = (error instanceof Error ? error.message : String(error)) || 'Transaction failed or rejected'
 
       if (msg.includes('user rejected') || msg.includes('denied')) {
         toast.error('Transaction was rejected by user.', { id: 'tx-toast' })

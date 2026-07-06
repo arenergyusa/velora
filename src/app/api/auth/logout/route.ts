@@ -10,7 +10,7 @@ export async function POST() {
     const cookieStore = await cookies()
     cookieStore.delete('session')
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Logout error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

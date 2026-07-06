@@ -17,7 +17,7 @@ export async function GET() {
       authenticated: true,
       user: session.user
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Session check error:', error)
     return NextResponse.json({ authenticated: false, user: null })
   }

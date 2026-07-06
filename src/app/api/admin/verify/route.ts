@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const isAdmin = config?.value.toLowerCase() === walletAddress.toLowerCase()
 
     return NextResponse.json({ success: true, isAdmin })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

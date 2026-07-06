@@ -30,7 +30,7 @@ export function HowItWorks() {
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <h2 className="text-xs font-bold tracking-wider text-sky-700 uppercase">How It Works</h2>
           <p className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Four simple steps. That's it.
+            Four simple steps. That&apos;s it.
           </p>
           <p className="text-slate-500 text-base leading-relaxed">
             No complicated setup, no confusing jargon. Just connect, activate, invite, and grow. You could be up and running in under 5 minutes.

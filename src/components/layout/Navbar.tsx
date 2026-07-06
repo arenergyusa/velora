@@ -5,18 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Wallet, ArrowRight, Home, Info, Phone, HelpCircle } from 'lucide-react';
 import { UniverseLogo } from '@/components/ui/UniverseLogo';
-import { useWallet } from '@/context/WalletContext';
-
+// useWallet removed
 export default function Navbar() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { address, isConnected, connect, disconnect } = useWallet();
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
@@ -25,8 +20,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const safeIsConnected = mounted ? isConnected : false;
-  const safeAddress = mounted ? address : '';
+
 
   const navLinks = [
     { name: 'Home', href: '/', icon: <Home className="w-4 h-4" /> },
@@ -36,7 +30,6 @@ export default function Navbar() {
   ];
 
   const isActive = (path: string) => pathname === path;
-  const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   return (
     <>

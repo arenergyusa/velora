@@ -11,8 +11,7 @@ const DEFAULT_LEVEL_PCT: Record<number, number> = {
  */
 export async function distributeLevelCommissions(
   depositingUserId: string,
-  depositAmountUsd: number,
-  _cycleNumber: number
+  depositAmountUsd: number
 ) {
   try {
     // 1. Fetch all level configs from DB

@@ -16,7 +16,7 @@ function getCurrentMonthKey(): { year: number; month: number; key: string } {
  */
 async function calculateDownlineBusiness(userId: string): Promise<number> {
   try {
-    const result: any[] = await prisma.$queryRaw`
+    const result: { total: unknown }[] = await prisma.$queryRaw`
       WITH RECURSIVE downline AS (
         SELECT id FROM "User" WHERE id = ${userId}
         UNION

@@ -16,12 +16,14 @@ export default function AuthPage() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 
   // Redirect to dashboard if fully authenticated
   useEffect(() => {
     if (mounted && isAuthenticated && !hasSignedIn) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasSignedIn(true)
       router.push('/dashboard')
     }

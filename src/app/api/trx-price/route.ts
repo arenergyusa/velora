@@ -22,8 +22,8 @@ export async function GET() {
       price: price,
       symbol: 'TRX/USDT'
     });
-  } catch (error: any) {
-    console.error('Error fetching BNB price:', error.message);
+  } catch (error: unknown) {
+    console.error('Error fetching trx price:', error instanceof Error ? error.message : String(error));
 
     // Fallback price in case API fails
     return NextResponse.json({

@@ -9,7 +9,6 @@ import {
   ArrowUpCircle,
   Layers,
   Users,
-  Copy,
   ChevronRight,
   TrendingUp,
   AlertCircle,
@@ -17,7 +16,6 @@ import {
   Share2,
   Link as LinkIcon,
   Gift,
-  ArrowRightLeft,
   Banknote,
   PiggyBank,
   Network
@@ -26,13 +24,13 @@ import CopyButton from '@/components/dashboard/CopyButton'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-export default function DashboardClient({ fallbackData, serverAddress }: { fallbackData?: any, serverAddress?: string }) {
+export default function DashboardClient({ fallbackData, serverAddress }: { fallbackData?: unknown, serverAddress?: string }) {
   const { address, isConnected } = useWallet()
 
   // Use the connected address if available, otherwise fallback to the one from session
   const activeAddress = (isConnected && address) || serverAddress
 
-  const { data: resData, error, isLoading } = useSWR(
+  const { data: resData, isLoading } = useSWR(
     activeAddress ? `/api/user/stats?address=${activeAddress}` : null,
     fetcher,
     {

@@ -6,22 +6,22 @@ const features = [
   {
     icon: <Lock className="w-6 h-6 text-sky-600" />,
     title: 'Your Identity Stays Yours',
-    description: "No passwords to remember, no email signups. Just connect your wallet and you're in. We believe your digital identity should be in your hands — not ours."
+    description: "No passwords to remember, no email signups. Just connect your wallet and you&apos;re in. We believe your digital identity should be in your hands — not ours."
   },
   {
     icon: <Zap className="w-6 h-6 text-emerald-600" />,
     title: 'Built for Speed & Simplicity',
-    description: "Every interaction is designed to be fast and intuitive. Whether you're checking your dashboard or inviting a friend, things just work — no friction, no confusion."
+    description: "Every interaction is designed to be fast and intuitive. Whether you&apos;re checking your dashboard or inviting a friend, things just work — no friction, no confusion."
   },
   {
     icon: <Heart className="w-6 h-6 text-indigo-600" />,
     title: 'Community First, Always',
-    description: "Velora grows because people share it with people they trust. We've built everything around that idea — a platform where your community genuinely benefits alongside you."
+    description: "Velora grows because people share it with people they trust. We&apos;ve built everything around that idea — a platform where your community genuinely benefits alongside you."
   },
   {
     icon: <Globe className="w-6 h-6 text-amber-600" />,
     title: 'Works Everywhere You Do',
-    description: "On the bus, at a café, or at your desk — Velora looks and feels great on every screen. We obsess over the small details so you don't have to."
+    description: "On the bus, at a café, or at your desk — Velora looks and feels great on every screen. We obsess over the small details so you don&apos;t have to."
   }
 ];
 
@@ -35,7 +35,7 @@ export function Features() {
             A platform that respects your time and trust
           </p>
           <p className="text-slate-500 text-base leading-relaxed">
-            We didn't build Velora to impress — we built it to be useful. Here's what makes it different from everything else out there.
+            We didn&apos;t build Velora to impress — we built it to be useful. Here&apos;s what makes it different from everything else out there.
           </p>
         </div>
 

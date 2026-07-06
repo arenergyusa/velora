@@ -4,9 +4,18 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RefreshCw, Users, Wallet, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react'
 
+interface AdminStats {
+  totalUsers: number
+  activeUsers: number
+  totalDeposits: number
+  totalWithdrawals: number
+  pendingWithdrawalsAmount: number
+  pendingWithdrawalsCount: number
+}
+
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<AdminStats | null>(null)
 
   useEffect(() => {
     fetch('/api/admin/stats')

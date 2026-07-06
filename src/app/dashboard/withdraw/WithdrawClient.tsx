@@ -11,15 +11,14 @@ export default function WithdrawClient({
   fallbackConfig,
   serverAddress
 }: {
-  fallbackStats?: any,
-  fallbackConfig?: any,
+  fallbackStats?: unknown,
+  fallbackConfig?: unknown,
   serverAddress?: string
 }) {
   const { address, isConnected } = useWallet()
   const [amountUsd, setAmountUsd] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [trxPriceUsd, setTrxPriceUsd] = useState<number>(0.15)
-  const [isLoadingPrice, setIsLoadingPrice] = useState(true)
 
   const activeAddress = (isConnected && address) || serverAddress
 
@@ -55,10 +54,8 @@ export default function WithdrawClient({
         if (data && data.price) {
           setTrxPriceUsd(parseFloat(data.price))
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Failed to fetch TRX price:', error)
-      } finally {
-        setIsLoadingPrice(false)
       }
     }
 
@@ -105,7 +102,7 @@ export default function WithdrawClient({
         setAmountUsd('')
         // Update local available balance optimistically
         mutateStats(
-          (prev: any) => {
+          (prev: { stats?: { availableBalanceUsd: number } }) => {
             if (!prev || !prev.stats) return prev;
             return {
               ...prev,
@@ -122,7 +119,7 @@ export default function WithdrawClient({
       } else {
         toast.error(data.error || 'Failed to submit withdrawal request')
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred during submission')
     } finally {
       setIsProcessing(false)

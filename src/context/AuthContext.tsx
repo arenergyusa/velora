@@ -73,15 +73,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(data.user)
           authenticatedAddressRef.current = data.user.walletAddress
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Only log if it's not a 404, to avoid spamming the console on new setups
-        if (!err.message?.includes('404')) {
+        if (err instanceof Error && !err.message.includes('404')) {
           console.error('Session check failed:', err)
         }
       }
     }
     checkSession()
-  }, [])
+  }, [pathname])
 
   // ─── Sign in with message signature ───
   const signIn = useCallback(async () => {
@@ -110,14 +110,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error(nonceData.error || 'Failed to get nonce')
       }
 
-      const { message, nonce, nonceToken } = nonceData
+      const { message, nonceToken } = nonceData
 
       // Step 2: Request user to sign the message using wagmi (uses correct active connector)
       let signature: string
       try {
         signature = await signMessageAsync({ message })
-      } catch (signError: any) {
-        const errorMsg = signError?.message || signError?.toString() || ''
+      } catch (signError: unknown) {
+        const errorMsg = signError instanceof Error ? signError.message : String(signError)
         if (errorMsg.includes('cancel') ||
             errorMsg.includes('reject') ||
             errorMsg.includes('denied') ||
@@ -164,14 +164,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (authData.isNewUser && typeof window !== 'undefined') {
         localStorage.removeItem('ref')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign-in error:', error)
-      setAuthError(error.message || 'Authentication failed')
+      setAuthError(error instanceof Error ? error.message : 'Authentication failed')
     } finally {
       setIsAuthenticating(false)
       isSigningRef.current = false
     }
-  }, [isConnected, address])
+  }, [isConnected, address, signMessageAsync])
 
   // ─── Sign out ───
   const signOut = useCallback(async () => {

@@ -36,7 +36,7 @@ export async function GET() {
         pendingWithdrawalsCount: pendingWithdrawalCount
       }
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

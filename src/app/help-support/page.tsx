@@ -29,7 +29,7 @@ export default function HelpSupport() {
     },
     {
       title: 'Troubleshooting Tips',
-      description: "Wallet not connecting? Page not loading? Don't worry — most issues have quick fixes. Check these common solutions first.",
+      description: "Wallet not connecting? Page not loading? Don&apos;t worry — most issues have quick fixes. Check these common solutions first.",
       icon: <HelpCircle className="w-5 h-5 text-indigo-600" />
     }
   ];
@@ -42,7 +42,7 @@ export default function HelpSupport() {
           <div className="space-y-8 animate-fade-in">
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Help & Support</h1>
-              <p className="text-slate-500 text-sm">We've put together guides and answers for the most common questions. If you can't find what you need, just reach out.</p>
+              <p className="text-slate-500 text-sm">We&apos;ve put together guides and answers for the most common questions. If you can&apos;t find what you need, just reach out.</p>
             </div>
 
             <div className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-12">

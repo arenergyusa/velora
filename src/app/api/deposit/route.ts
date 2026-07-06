@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { JsonRpcProvider, FallbackProvider, Interface, id, parseUnits } from 'ethers'
+import { JsonRpcProvider, FallbackProvider, id, parseUnits } from 'ethers'
 
 export async function POST(request: Request) {
   try {

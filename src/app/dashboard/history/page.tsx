@@ -8,12 +8,29 @@ import Link from 'next/link'
 
 type TabType = 'ALL' | 'DEPOSITS' | 'WITHDRAWALS' | 'INVESTMENTS' | 'ROI' | 'LEVEL_COMMISSION' | 'SALARY'
 
+interface Transaction {
+  id: string
+  txType: string
+  amountUsd?: number
+  amountNative?: number
+  feeUsd?: number
+  depositUsd?: number
+  cycleNumber?: number
+  maxEarning?: number
+  description?: string
+  level?: number
+  sourceUserId?: string
+  status: string
+  createdAt: string | Date
+  txHash?: string
+}
+
 export default function HistoryPage() {
   const { address, isConnected } = useWallet()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('ALL')
   
-  const [allTransactions, setAllTransactions] = useState<any[]>([])
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -60,12 +77,13 @@ export default function HistoryPage() {
       { threshold: 0.1 }
     )
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current)
+    const target = observerTarget.current
+    if (target) {
+      observer.observe(target)
     }
 
     return () => {
-      if (observerTarget.current) observer.unobserve(observerTarget.current)
+      if (target) observer.unobserve(target)
     }
   }, [hasMore, loadingMore, loading])
 
@@ -118,7 +136,7 @@ export default function HistoryPage() {
     }
   }
 
-  const getTxDetails = (tx: any) => {
+  const getTxDetails = (tx: Transaction) => {
     switch (tx.txType) {
       case 'DEPOSIT':
         return {

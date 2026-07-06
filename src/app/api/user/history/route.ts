@@ -63,7 +63,7 @@ export async function GET(request: Request) {
     ])
 
     // Combine all fetched records
-    let combined = [...deposits, ...withdrawals, ...investments, ...earnings]
+    const combined = [...deposits, ...withdrawals, ...investments, ...earnings]
 
     // Sort globally by date descending
     combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())

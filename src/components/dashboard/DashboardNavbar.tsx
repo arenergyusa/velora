@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, LayoutDashboard, Layers, Users2, ArrowDownCircle, ArrowUpCircle, History, LogOut, Wallet, ShieldCheck, Copy, Check, Gift } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Layers, Users2, ArrowDownCircle, ArrowUpCircle, History, LogOut, Wallet, ShieldCheck } from 'lucide-react';
 import { UniverseLogo } from '@/components/ui/UniverseLogo';
 import { useWallet } from '@/context/WalletContext';
 import { useAuth } from '@/context/AuthContext';

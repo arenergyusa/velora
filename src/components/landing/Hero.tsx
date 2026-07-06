@@ -1,7 +1,6 @@
 'use client'
 
-import Link from 'next/link'
-import { ArrowRight, Users, CheckCircle } from 'lucide-react'
+import { ArrowRight, CheckCircle } from 'lucide-react'
 import { useWallet } from '@/context/WalletContext'
 
 const stats = [
@@ -31,7 +30,7 @@ export function Hero() {
             </h1>
 
             <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Velora is where communities come alive. Connect your wallet, bring in the people you believe in, and grow together on a platform that's designed to be transparent, fair, and genuinely rewarding.
+              Velora is where communities come alive. Connect your wallet, bring in the people you believe in, and grow together on a platform that&apos;s designed to be transparent, fair, and genuinely rewarding.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
@@ -39,7 +38,7 @@ export function Hero() {
                 onClick={() => connect()}
                 className="glow-btn w-full sm:w-auto inline-flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 py-4 rounded-xl text-base shadow-lg shadow-slate-900/10 transition-all duration-200"
               >
-                <span>Get Started — It's Quick</span>
+                <span>Get Started — It&apos;s Quick</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
               <a

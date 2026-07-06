@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, type ReactNode } from 'react'
-import { createAppKit, useAppKit, useAppKitAccount, useAppKitProvider, useDisconnect as useAppKitDisconnect } from '@reown/appkit/react'
+import { createAppKit, useAppKit, useAppKitAccount, useDisconnect as useAppKitDisconnect } from '@reown/appkit/react'
 import { WagmiProvider } from 'wagmi'
 import { bsc } from '@reown/appkit/networks'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'

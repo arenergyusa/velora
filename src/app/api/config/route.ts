@@ -19,7 +19,7 @@ export async function GET() {
       masterWallet: configMap['platform_wallet_address'] || '0x1F0f0980feE31EC75F188f16F1d5C7001395D3C1',
       minWithdrawalUsd: Number(configMap['min_withdrawal_usd']) || 10,
       withdrawalFeePct: Number(configMap['withdrawal_fee_pct']) || 10,
-      plans: plans.map((p: any) => ({
+      plans: plans.map((p: { id: string; name: string; minDepositUsd: unknown; maxDepositUsd: unknown; monthlyRoiPct: unknown }) => ({
         id: p.id,
         name: p.name,
         min: Number(p.minDepositUsd),
@@ -27,7 +27,7 @@ export async function GET() {
         roi: Number(p.monthlyRoiPct)
       }))
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

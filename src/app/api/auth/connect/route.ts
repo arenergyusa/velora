@@ -32,8 +32,8 @@ export async function POST(req: Request) {
     let recoveredAddress: string
     try {
       recoveredAddress = verifyMessage(message, signature)
-    } catch (err) {
-      console.error('Signature verification failed:', err)
+    } catch (_err) {
+      console.error('Signature verification failed:', _err)
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
          return NextResponse.json({ error: 'Nonce token address mismatch' }, { status: 401 })
       }
       expectedNonce = payload.nonce as string
-    } catch (err) {
+    } catch {
       return NextResponse.json({ error: 'Invalid or expired nonce token' }, { status: 401 })
     }
 
@@ -164,7 +164,7 @@ export async function POST(req: Request) {
         status: user.status
       }
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Auth error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

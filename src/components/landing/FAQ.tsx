@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     question: "Are my deposits locked?",
-    answer: "Your initial deposit acts as your tier activation and contributes to overall liquidity. While the principal isn't withdrawn directly, your daily rewards and community bonuses are fully liquid and can be withdrawn at any time."
+    answer: "Your initial deposit acts as your tier activation and contributes to overall liquidity. While the principal isn&apos;t withdrawn directly, your daily rewards and community bonuses are fully liquid and can be withdrawn at any time."
   }
 ];
 
@@ -41,10 +41,10 @@ export function FAQ() {
           <div className="lg:col-span-5 space-y-6 text-center lg:text-left lg:sticky lg:top-32">
             <h2 className="text-xs font-bold tracking-wider text-sky-700 uppercase">FAQ</h2>
             <h3 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Got questions? <br className="hidden lg:block" /> We've got answers.
+              Got questions? <br className="hidden lg:block" /> We&apos;ve got answers.
             </h3>
             <p className="text-slate-500 text-base leading-relaxed max-w-lg mx-auto lg:mx-0">
-              If you can't find what you're looking for, feel free to reach out to our team via the contact page or community chat.
+              If you can&apos;t find what you&apos;re looking for, feel free to reach out to our team via the contact page or community chat.
             </p>
             <div className="pt-2 flex justify-center lg:justify-start">
               <Link

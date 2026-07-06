@@ -3,7 +3,7 @@
 import { useWallet } from '@/context/WalletContext'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import DashboardNavbar from '@/components/dashboard/DashboardNavbar'
 import Footer from '@/components/layout/Footer'

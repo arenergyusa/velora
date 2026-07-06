@@ -1,10 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState } from 'react'
 import { ArrowRight, RefreshCw, Layers, ShieldCheck, DollarSign, Wallet } from 'lucide-react'
 import { toast } from 'sonner'
 import useSWR, { mutate } from 'swr'
@@ -16,8 +12,8 @@ export default function TopUpClient({
   fallbackPlans,
   serverAddress
 }: {
-  fallbackStats?: any,
-  fallbackPlans?: any[],
+  fallbackStats?: unknown,
+  fallbackPlans?: { id: string; min: number; max?: number; name: string; roi: number }[],
   serverAddress?: string
 }) {
   const { address, isConnected } = useWallet()
@@ -28,7 +24,7 @@ export default function TopUpClient({
 
   const activeAddress = (isConnected && address) || serverAddress
 
-  const { data: resData, mutate: mutateStats, isLoading: isLoadingStats } = useSWR(
+  const { data: resData, mutate: mutateStats } = useSWR(
     activeAddress ? `/api/user/stats?address=${activeAddress}` : null,
     (url: string) => fetch(url).then(res => res.json()),
     { fallbackData: fallbackStats, revalidateOnFocus: false }
@@ -46,7 +42,7 @@ export default function TopUpClient({
   const plans = configData?.success ? configData.plans : []
   const isLoadingConfig = !fallbackPlans && isLoadingConfigData
 
-  const activePlanDetails = plans.find((p: any) => p.id === selectedPlan)
+  const activePlanDetails = plans.find((p: { id: string; min: number; max?: number; name: string; roi: number }) => p.id === selectedPlan)
 
   const handleMax = () => {
     if (activePlanDetails) {
@@ -94,7 +90,7 @@ export default function TopUpClient({
 
         // Optimistic UI Update: Deduct balance locally before refetching
         mutateStats(
-          (prev: any) => {
+          (prev: { stats?: { availableBalanceUsd: number; activeDepositUsd: number; activePlan: string } }) => {
             if (!prev || !prev.stats) return prev;
             return {
               ...prev,
@@ -117,7 +113,7 @@ export default function TopUpClient({
       } else {
         toast.error(result.error || 'Failed to process investment')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error)
       toast.error('An error occurred during investment.')
     } finally {
@@ -165,7 +161,7 @@ export default function TopUpClient({
       <div className="grid md:grid-cols-3 gap-6">
         {plans.length === 0 ? (
           <div className="col-span-3 text-center text-slate-500 py-8">No active plans available</div>
-        ) : plans.map((plan: any) => (
+        ) : plans.map((plan: { id: string; min: number; max?: number; name: string; roi: number }) => (
           <div
             key={plan.id}
             className={`glass-card bg-white border rounded-3xl p-6 transition-all cursor-pointer group ${selectedPlan === plan.id

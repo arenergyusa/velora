@@ -49,7 +49,7 @@ export async function GET(req: Request) {
       nonceToken,
       isNewUser: !user 
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Nonce generation error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
