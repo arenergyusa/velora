@@ -7,7 +7,7 @@ import { FAQ } from "@/components/landing/FAQ";
 
 export default function Home() {
   return (
-    <main className="flex-grow bg-white">
+    <main className="flex-grow bg-card">
       <Navbar />
       <div className="flex-1">
         <Hero />

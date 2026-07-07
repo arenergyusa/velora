@@ -22,14 +22,14 @@ export default function Terms() {
         <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-8 animate-fade-in">
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Terms & Conditions</h1>
-              <p className="text-slate-500 text-sm">Last updated: June 2026. We&apos;ve tried to keep this readable — because terms shouldn&apos;t require a law degree.</p>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">Terms & Conditions</h1>
+              <p className="text-muted-foreground text-sm">Last updated: June 2026. We&apos;ve tried to keep this readable — because terms shouldn&apos;t require a law degree.</p>
             </div>
 
-            <div className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm">
-              <div className="prose prose-slate text-slate-600 max-w-none space-y-8 leading-relaxed text-sm">
+            <div className="glass-card p-6 sm:p-8 rounded-2xl border border-border/50 shadow-sm">
+              <div className="prose prose-slate text-muted-foreground max-w-none space-y-8 leading-relaxed text-sm">
             <div className="space-y-3">
-              <h2 className="text-xl font-bold text-slate-900">1. By using Velora, you agree to these terms</h2>
+              <h2 className="text-xl font-bold text-foreground">1. By using Velora, you agree to these terms</h2>
               <p>
                 When you connect your wallet and use Velora, you&apos;re agreeing to follow these terms. If something here doesn&apos;t work for you, we&apos;d ask that you not use the platform.
               </p>
@@ -39,7 +39,7 @@ export default function Terms() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-xl font-bold text-slate-900">2. Your account is your responsibility</h2>
+              <h2 className="text-xl font-bold text-foreground">2. Your account is your responsibility</h2>
               <p>
                 You&apos;re in charge of your wallet, your device, and your recovery phrase. We can&apos;t access or restore your wallet if something goes wrong on your end — that&apos;s by design, not by accident. It&apos;s what keeps the system secure.
               </p>
@@ -49,7 +49,7 @@ export default function Terms() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-xl font-bold text-slate-900">3. How the platform works</h2>
+              <h2 className="text-xl font-bold text-foreground">3. How the platform works</h2>
               <p>
                 Velora allows you to activate your account with a one-time deposit. Once activated, you get access to your personal dashboard where you can invite others, track your community&apos;s growth, and manage your account.
               </p>
@@ -59,7 +59,7 @@ export default function Terms() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-xl font-bold text-slate-900">4. Play fair</h2>
+              <h2 className="text-xl font-bold text-foreground">4. Play fair</h2>
               <p>
                 Don&apos;t try to game the system, spam other users, create fake accounts, or do anything that hurts the experience for others. We&apos;re building this for honest people who want a fair shot.
               </p>
@@ -69,21 +69,21 @@ export default function Terms() {
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-xl font-bold text-slate-900">5. Withdrawals and fees</h2>
+              <h2 className="text-xl font-bold text-foreground">5. Withdrawals and fees</h2>
               <p>
                 You can withdraw your rewards from your internal balance. There&apos;s a minimum withdrawal amount and a processing fee — both are visible in your dashboard settings. These help cover transaction costs and keep the platform running.
               </p>
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-xl font-bold text-slate-900">6. Things can change</h2>
+              <h2 className="text-xl font-bold text-foreground">6. Things can change</h2>
               <p>
                 We&apos;re constantly improving Velora. That means these terms, platform features, and system parameters may evolve over time. We&apos;ll always try to give you a heads-up, but continued use means you&apos;re okay with the latest version.
               </p>
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-xl font-bold text-slate-900">7. No guarantees & Market Risk</h2>
+              <h2 className="text-xl font-bold text-foreground">7. No guarantees & Market Risk</h2>
               <p>
                 Like any platform, Velora is provided as-is. We work hard to keep things running smoothly, but we can&apos;t promise zero downtime or that every feature will work perfectly at all times. Technology has its days.
               </p>

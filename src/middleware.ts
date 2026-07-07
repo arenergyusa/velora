@@ -27,10 +27,10 @@ if (hasRedisConfig) {
     analytics: true,
   })
 
-  // 1 request per 10 seconds for Financial actions (Deposit, Withdraw, Topup)
+  // 5 requests per 30 seconds for Financial actions (Deposit, Withdraw, Topup)
   financialRatelimit = new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(1, '10 s'),
+    limiter: Ratelimit.slidingWindow(5, '30 s'),
     analytics: true,
   })
 }

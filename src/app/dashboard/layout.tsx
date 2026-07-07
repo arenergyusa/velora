@@ -33,17 +33,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (isAuthenticating || !isConnected || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-muted">
         <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-sky-500 mx-auto" />
-          <p className="text-slate-500 font-medium">Verifying your wallet...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground font-medium">Verifying your wallet...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-muted">
       {/* Top Navigation - Exact match to reference dApp */}
       <DashboardNavbar userStatus={user?.status || 'inactive'} />
 

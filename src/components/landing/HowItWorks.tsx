@@ -25,25 +25,25 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20 bg-white relative overflow-hidden border-b border-slate-200/50">
+    <section id="how-it-works" className="py-20 bg-card relative overflow-hidden border-b border-border/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <h2 className="text-xs font-bold tracking-wider text-sky-700 uppercase">How It Works</h2>
-          <p className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="text-xs font-bold tracking-wider text-primary uppercase">How It Works</h2>
+          <p className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
             Four simple steps. That&apos;s it.
           </p>
-          <p className="text-slate-500 text-base leading-relaxed">
+          <p className="text-muted-foreground text-base leading-relaxed">
             No complicated setup, no confusing jargon. Just connect, activate, invite, and grow. You could be up and running in under 5 minutes.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step, i) => (
-            <div key={i} className="relative glass-card p-6 rounded-2xl border border-slate-100 space-y-6">
-              <div aria-hidden="true" className="text-4xl font-black text-sky-600 tracking-wider font-mono">{step.step}</div>
+            <div key={i} className="relative glass-card p-6 rounded-2xl border border-border/50 space-y-6">
+              <div aria-hidden="true" className="text-4xl font-black text-primary tracking-wider font-mono">{step.step}</div>
               <div className="space-y-2">
-                <h3 className="text-lg font-bold text-slate-900">{step.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{step.description}</p>
+                <h3 className="text-lg font-bold text-foreground">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
               </div>
             </div>
           ))}

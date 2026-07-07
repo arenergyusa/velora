@@ -15,7 +15,7 @@ const faqs = [
   },
   {
     question: "Is there a maximum reward cap?",
-    answer: "Yes, to ensure the sustainability of the platform, accounts have a maximum cap of 3x to 4x your deposited amount. Once this cap is reached, you will need to re-deposit or upgrade your tier to continue."
+    answer: "Yes, to ensure the sustainability of the platform, accounts have a maximum cap of 2x to 3x your deposited amount. Once this cap is reached, you will need to re-deposit or upgrade your tier to continue."
   },
   {
     question: "How does the community building system work?",
@@ -35,21 +35,21 @@ export function FAQ() {
   };
 
   return (
-    <section id="faq" className="py-24 bg-white">
+    <section id="faq" className="py-24 bg-card">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
           <div className="lg:col-span-5 space-y-6 text-center lg:text-left lg:sticky lg:top-32">
-            <h2 className="text-xs font-bold tracking-wider text-sky-700 uppercase">FAQ</h2>
-            <h3 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-xs font-bold tracking-wider text-primary uppercase">FAQ</h2>
+            <h3 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
               Got questions? <br className="hidden lg:block" /> We&apos;ve got answers.
             </h3>
-            <p className="text-slate-500 text-base leading-relaxed max-w-lg mx-auto lg:mx-0">
+            <p className="text-muted-foreground text-base leading-relaxed max-w-lg mx-auto lg:mx-0">
               If you can&apos;t find what you&apos;re looking for, feel free to reach out to our team via the contact page or community chat.
             </p>
             <div className="pt-2 flex justify-center lg:justify-start">
               <Link
                 href="/contact"
-                className="inline-flex items-center space-x-2 text-sm font-bold text-sky-600 hover:text-sky-700 transition-colors bg-sky-50 px-4 py-2 rounded-xl"
+                className="inline-flex items-center space-x-2 text-sm font-bold text-primary hover:text-primary transition-colors bg-primary/10 px-4 py-2 rounded-xl"
               >
                 <span>Contact Support</span>
                 <ArrowRight className="w-4 h-4" />
@@ -61,27 +61,25 @@ export function FAQ() {
             {faqs.map((faq, i) => (
               <div
                 key={i}
-                className="glass-card border border-slate-100 rounded-2xl overflow-hidden transition-all duration-200 shadow-sm"
+                className="glass-card border border-border/50 rounded-2xl overflow-hidden transition-all duration-200 shadow-sm"
               >
                 <button
                   onClick={() => toggleFaq(i)}
-                  className="w-full flex items-center justify-between p-6 text-left focus:outline-none bg-white hover:bg-slate-50/50 transition-colors"
+                  className="w-full flex items-center justify-between p-6 text-left focus:outline-none bg-card hover:bg-muted/50 transition-colors"
                 >
-                  <span className="font-bold text-slate-800 pr-4 text-base">{faq.question}</span>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${activeFaq === i ? 'bg-sky-100 text-sky-600' : 'bg-slate-100 text-slate-400'}`}>
+                  <span className="font-bold text-foreground pr-4 text-base">{faq.question}</span>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${activeFaq === i ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
                     <ChevronDown
-                      className={`w-5 h-5 transition-transform duration-200 ${
-                        activeFaq === i ? 'transform rotate-180' : ''
-                      }`}
+                      className={`w-5 h-5 transition-transform duration-200 ${activeFaq === i ? 'transform rotate-180' : ''
+                        }`}
                     />
                   </div>
                 </button>
                 <div
-                  className={`transition-all duration-300 ${
-                    activeFaq === i ? 'max-h-96 border-t border-slate-100' : 'max-h-0 overflow-hidden'
-                  }`}
+                  className={`transition-all duration-300 ${activeFaq === i ? 'max-h-96 border-t border-border/50' : 'max-h-0 overflow-hidden'
+                    }`}
                 >
-                  <div className="p-6 text-sm text-slate-500 leading-relaxed bg-slate-50/50">
+                  <div className="p-6 text-sm text-muted-foreground leading-relaxed bg-muted/50">
                     {faq.answer}
                   </div>
                 </div>

@@ -5,7 +5,9 @@ import { ArrowDownToLine, RefreshCw, DollarSign, Coins, ShieldCheck, CheckCircle
 import { toast } from 'sonner'
 import useSWR, { mutate } from 'swr'
 import { useWallet } from '@/context/WalletContext'
-import { BrowserProvider, parseUnits, Contract, isAddress, Eip1193Provider } from 'ethers'
+import { useWriteContract, useConfig } from 'wagmi'
+import { waitForTransactionReceipt } from '@wagmi/core'
+import { parseUnits, isAddress, parseAbi } from 'viem'
 
 export default function DepositClient({
   fallbackStats,
@@ -20,8 +22,11 @@ export default function DepositClient({
   const [amountUsd, setAmountUsd] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const [trxPriceUsd, setTrxPriceUsd] = useState<number>(0.15)
+  const [trxPriceUsd, setTrxPriceUsd] = useState<number>(0.3268)
   const [isLoadingPrice, setIsLoadingPrice] = useState(true)
+
+  const { writeContractAsync } = useWriteContract()
+  const config = useConfig()
 
   const activeAddress = (isConnected && address) || serverAddress
 
@@ -65,7 +70,7 @@ export default function DepositClient({
   }, [])
 
   const amountTrx = amountUsd ? (parseFloat(amountUsd) / trxPriceUsd).toFixed(2) : '0.00'
-  const minDeposit = 10;
+  const minDeposit = 1;
 
   const handleDeposit = async () => {
     if (!amountUsd || !address || !userData?.id || !masterWallet) {
@@ -79,46 +84,48 @@ export default function DepositClient({
       return
     }
 
-    // Check if MetaMask/browser wallet is available
-    if (typeof window === 'undefined' || !(window as unknown as { ethereum: unknown }).ethereum) {
-      toast.error('MetaMask or a compatible wallet not detected in browser.')
+    if (!isAddress(masterWallet)) {
+      toast.error(`Platform error: Invalid Master Wallet Address configured in system (${masterWallet}). Please contact admin.`)
+      return
+    }
+
+    if (masterWallet.toLowerCase() === address.toLowerCase()) {
+      toast.error("Platform error: Master wallet and your address cannot be the same. Please update the platform wallet address.")
       return
     }
 
     setIsProcessing(true)
     try {
-      const provider = new BrowserProvider((window as unknown as { ethereum: Eip1193Provider }).ethereum)
-      const signer = await provider.getSigner()
-
       // ERC20 Transfer for Binance-Peg TRX on BSC
-      const trxContractAddress = process.env.NEXT_PUBLIC_TRX_CONTRACT_ADDRESS || '0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3'
+      const trxContractAddress = (process.env.NEXT_PUBLIC_TRX_CONTRACT_ADDRESS || '0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3') as `0x${string}`
       const amountWei = parseUnits(amountTrx, 6) // TRX on BSC uses 6 decimals
 
       toast.loading('Please confirm the transaction in your wallet...', { id: 'tx-toast' })
 
-      const erc20Abi = [
+      const erc20Abi = parseAbi([
         "function transfer(address to, uint256 amount) returns (bool)"
-      ]
-      const trxContract = new Contract(trxContractAddress, erc20Abi, signer)
-
-      if (!isAddress(masterWallet)) {
-        toast.error(`Platform error: Invalid Master Wallet Address configured in system (${masterWallet}). Please contact admin.`)
-        setIsProcessing(false)
-        return
-      }
+      ])
 
       // 1. Execute Real Blockchain Transaction (TRX BEP20 transfer)
-      const tx = await trxContract.transfer(masterWallet, amountWei)
+      const txHash = await writeContractAsync({
+        address: trxContractAddress,
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [masterWallet as `0x${string}`, amountWei],
+      })
 
       // Wait for confirmation
       toast.loading('Transaction submitted! Waiting for confirmation...', { id: 'tx-toast' })
-      const receipt = await tx.wait(1) // Wait for 1 block confirmation
+      const receipt = await waitForTransactionReceipt(config, {
+        hash: txHash,
+        confirmations: 1,
+      })
 
-      if (!receipt || receipt.status !== 1) {
+      if (receipt.status !== 'success') {
         throw new Error('Transaction failed on the network.')
       }
 
-      const txHash = tx.hash
+      const finalTxHash = txHash
 
       toast.loading('Transaction confirmed! Saving to database...', { id: 'tx-toast' })
 
@@ -129,7 +136,7 @@ export default function DepositClient({
         body: JSON.stringify({
           userId: userData.id,
           amountUsd: amount,
-          txHash: txHash,
+          txHash: finalTxHash,
           amountNative: parseFloat(amountTrx),
           nativePriceUsd: trxPriceUsd
         })
@@ -168,8 +175,8 @@ export default function DepositClient({
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <RefreshCw className="h-8 w-8 animate-spin text-sky-500" />
-          <p className="text-slate-500 font-medium">Loading deposit module...</p>
+          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground font-medium">Loading deposit module...</p>
         </div>
       </div>
     )
@@ -178,10 +185,10 @@ export default function DepositClient({
   return (
     <div className="w-full min-w-0 space-y-6 sm:space-y-8 animate-fade-in pb-24 md:pb-8">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
           Add Funds
         </h1>
-        <p className="text-slate-500 text-sm mt-1">
+        <p className="text-muted-foreground text-sm mt-1">
           Deposit TRX (BEP-20) to your Internal Balance.
         </p>
       </div>
@@ -190,13 +197,13 @@ export default function DepositClient({
 
         {/* Left Column: Info */}
         <div className="lg:col-span-2 space-y-6 w-full min-w-0">
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-3xl p-6 sm:p-8 shadow-lg shadow-emerald-200/50 relative overflow-hidden text-white h-full flex flex-col justify-between min-h-[320px]">
+          <div className="gradient-bg rounded-3xl p-6 sm:p-8 shadow-lg shadow-primary/20 relative overflow-hidden h-full flex flex-col justify-between min-h-[320px]">
             <div className="absolute top-0 right-0 p-6 opacity-10">
               <Coins className="w-32 h-32" />
             </div>
 
             <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider mb-6 border border-white/20 backdrop-blur-md">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-card/20 rounded-full text-[10px] font-bold uppercase tracking-wider mb-6 border border-white/20 backdrop-blur-md">
                 <ShieldCheck className="w-3.5 h-3.5" /> Instant Funding
               </div>
 
@@ -228,27 +235,27 @@ export default function DepositClient({
 
         {/* Right Column: Form */}
         <div className="lg:col-span-3 w-full min-w-0">
-          <div className="glass-card bg-white border border-slate-200/60 rounded-3xl p-6 sm:p-8 shadow-sm">
-            <h3 className="text-xl font-bold tracking-tight text-slate-900 mb-6 flex items-center gap-2">
-              <ArrowDownToLine className="w-5 h-5 text-emerald-500" />
+          <div className="glass-card bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm">
+            <h3 className="text-xl font-bold tracking-tight text-foreground mb-6 flex items-center gap-2">
+              <ArrowDownToLine className="w-5 h-5 text-primary" />
               Deposit
             </h3>
 
             <div className="space-y-6">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <label htmlFor="amount" className="text-sm font-bold text-slate-700">
+                  <label htmlFor="amount" className="text-sm font-bold text-foreground">
                     Amount (USD)
                   </label>
                 </div>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <DollarSign className="h-5 w-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+                    <DollarSign className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   </div>
                   <input
                     id="amount"
                     type="number"
-                    className="block w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-lg font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                    className="block w-full pl-11 pr-4 py-4 bg-muted border border-border rounded-2xl text-lg font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     placeholder={`Min: $${minDeposit}`}
                     value={amountUsd}
                     onChange={(e) => setAmountUsd(e.target.value)}
@@ -258,19 +265,19 @@ export default function DepositClient({
 
               {/* Calculation Breakdown */}
               <div className={`overflow-hidden transition-all duration-300 ease-in-out ${parseFloat(amountUsd) > 0 ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 sm:p-5 space-y-3 sm:space-y-4">
+                <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 sm:p-5 space-y-3 sm:space-y-4">
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500 font-medium">Live TRX Price</span>
-                    <span className="text-slate-900 font-bold">
-                      {isLoadingPrice ? <RefreshCw className="h-4 w-4 animate-spin text-emerald-500" /> : `$${trxPriceUsd.toFixed(4)}`}
+                    <span className="text-muted-foreground font-medium">Live TRX Price</span>
+                    <span className="text-foreground font-bold">
+                      {isLoadingPrice ? <RefreshCw className="h-4 w-4 animate-spin text-primary" /> : `$${trxPriceUsd.toFixed(4)}`}
                     </span>
                   </div>
-                  <div className="h-px bg-emerald-200/50 w-full my-1 sm:my-2"></div>
+                  <div className="h-px bg-primary/20 w-full my-1 sm:my-2"></div>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                    <span className="text-slate-700 font-bold">You Pay (Approx)</span>
+                    <span className="text-foreground font-bold">You Pay (Approx)</span>
                     <div className="text-left sm:text-right">
-                      <div className="text-lg sm:text-xl font-black text-emerald-600">
-                        {amountTrx} TRX <span className="text-sm font-bold text-emerald-500/70">(BEP-20)</span>
+                      <div className="text-lg sm:text-xl font-black text-primary">
+                        {amountTrx} TRX <span className="text-sm font-bold text-primary/70">(BEP-20)</span>
                       </div>
                     </div>
                   </div>
@@ -280,7 +287,7 @@ export default function DepositClient({
               <button
                 onClick={handleDeposit}
                 disabled={!amountUsd || parseFloat(amountUsd) < minDeposit || isProcessing || isLoadingPrice}
-                className="w-full relative group overflow-hidden rounded-2xl bg-slate-900 text-white font-bold text-base py-4 px-6 transition-all hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-xl active:scale-[0.98]"
+                className="w-full relative group overflow-hidden rounded-2xl bg-primary text-primary-foreground font-bold text-base py-4 px-6 transition-all hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-xl active:scale-[0.98]"
               >
                 <div className="relative flex items-center justify-center gap-2 z-10">
                   {isProcessing ? (

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function DepositPage() {
   const session = await getSession()
-  
+
   if (!session || !session.user || !session.user.walletAddress) {
     redirect('/')
   }
@@ -26,7 +26,7 @@ export default async function DepositPage() {
 
   // Pre-fetch data on the server for SSR
   const stats = await getUserBalance(user.id)
-  
+
   const fallbackStats = {
     success: true,
     user: {
@@ -42,17 +42,17 @@ export default async function DepositPage() {
     acc[curr.key] = curr.value
     return acc
   }, {} as Record<string, string>)
-  
+
   const fallbackConfig = {
     success: true,
-    masterWallet: configMap['platform_wallet_address'] || 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+    masterWallet: configMap['platform_wallet_address'] || '0x1F0f0980feE31EC75F188f16F1d5C7001395D3C1',
   }
 
   return (
-    <DepositClient 
-      fallbackStats={fallbackStats} 
+    <DepositClient
+      fallbackStats={fallbackStats}
       fallbackConfig={fallbackConfig}
-      serverAddress={walletAddress} 
+      serverAddress={walletAddress}
     />
   )
 }

@@ -67,7 +67,7 @@ export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavb
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled || isMobileMenuOpen
             ? 'glass-nav py-3 shadow-sm'
-            : 'bg-white/80 backdrop-blur-md py-4 border-b border-slate-200/60'
+            : 'bg-card/80 backdrop-blur-md py-4 border-b border-border'
         }`}
       >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -88,8 +88,8 @@ export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavb
                   href={link.href}
                   className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-colors duration-200 ${
                     isActive(link.href)
-                      ? 'bg-sky-50 text-sky-600 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-primary/10 text-primary shadow-2xs'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }`}
                 >
                   {link.icon}
@@ -98,18 +98,18 @@ export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavb
               ))}
             </div>
             
-            <div className="w-px h-8 bg-slate-200 mx-2"></div>
+            <div className="w-px h-8 bg-border mx-2"></div>
 
             <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200/60 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-700">
-                <Wallet className="w-4 h-4 text-slate-500" />
+              <div className="flex items-center space-x-2 bg-muted border border-border rounded-xl px-3.5 py-2 text-xs font-bold text-foreground">
+                <Wallet className="w-4 h-4 text-muted-foreground" />
                 <span>{formatAddress(address)}</span>
-                <span className={`w-2 h-2 rounded-full ml-1 ${userStatus === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                <span className={`w-2 h-2 rounded-full ml-1 ${userStatus === 'active' ? 'bg-primary' : 'bg-accent'}`} />
               </div>
 
               <button
                 onClick={handleLogout}
-                className="flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                className="flex items-center justify-center p-2 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                 title="Sign Out"
               >
                 <LogOut className="w-5 h-5" />
@@ -120,7 +120,7 @@ export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavb
           <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-slate-600 hover:text-slate-900 p-2 rounded-lg hover:bg-slate-100 transition-colors focus:outline-none"
+              className="text-muted-foreground hover:text-foreground p-2 rounded-lg hover:bg-muted transition-colors focus:outline-none"
               aria-label="Toggle navigation menu"
             >
               {isMobileMenuOpen ? (
@@ -136,26 +136,26 @@ export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavb
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden glass-nav fixed top-[64px] sm:top-[72px] left-0 right-0 bottom-0 z-40 animate-fade-in shadow-lg overflow-y-auto pb-24 border-t border-slate-200/50">
+        <div className="lg:hidden glass-nav fixed top-[64px] sm:top-[72px] left-0 right-0 bottom-0 z-40 animate-fade-in shadow-lg overflow-y-auto pb-24 border-t border-border/50">
           <div className="px-4 pt-2 pb-6 space-y-2">
             {/* User Profile Mobile */}
-            <div className="p-4 mb-4 bg-white/60 border border-slate-200/60 rounded-2xl space-y-3">
+            <div className="p-4 mb-4 bg-card/60 border border-border rounded-2xl space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-600 border border-sky-500/20">
+                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                     <Wallet className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Wallet</div>
-                    <div className="text-sm font-bold text-slate-700">
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Wallet</div>
+                    <div className="text-sm font-bold text-foreground">
                       {formatAddress(address)}
                     </div>
                   </div>
                 </div>
                 <div className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                   userStatus === 'active' 
-                    ? 'bg-emerald-50 border border-emerald-150 text-emerald-700' 
-                    : 'bg-amber-50 border border-amber-150 text-amber-700'
+                    ? 'bg-emerald-900/30 border border-emerald-500/30 text-emerald-400' 
+                    : 'bg-accent/20 border border-accent/30 text-accent'
                 }`}>
                   <ShieldCheck className="w-3 h-3" />
                   {userStatus === 'active' ? 'Active' : 'Inactive'}
@@ -170,8 +170,8 @@ export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavb
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center space-x-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-colors ${
                   isActive(link.href)
-                    ? 'bg-sky-50 text-sky-600 shadow-2xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-primary/10 text-primary shadow-2xs'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
               >
                 {link.icon}
@@ -179,10 +179,10 @@ export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavb
               </Link>
             ))}
             
-            <div className="pt-6 border-t border-slate-200/60 mt-4 px-1">
+            <div className="pt-6 border-t border-border mt-4 px-1">
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center space-x-2 bg-rose-50 hover:bg-rose-100 text-rose-600 px-5 py-3 rounded-xl text-base font-bold transition-all duration-200"
+                className="w-full flex items-center justify-center space-x-2 bg-destructive/10 hover:bg-destructive/20 text-destructive px-5 py-3 rounded-xl text-base font-bold transition-all duration-200"
               >
                 <LogOut className="w-5 h-5" />
                 <span>Sign Out</span>

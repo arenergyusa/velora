@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { usePathname } from 'next/navigation'
 import { useWallet } from '@/context/WalletContext'
 import { useSignMessage } from 'wagmi'
+import { toast } from 'sonner'
 
 // ─── Types ───
 interface AuthUser {
@@ -113,10 +114,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { message, nonceToken } = nonceData
 
       // Step 2: Request user to sign the message using wagmi (uses correct active connector)
+      toast.loading('Please check your wallet or extension to approve the signature...', { id: 'auth-sign' })
       let signature: string
       try {
         signature = await signMessageAsync({ message })
+        toast.success('Signature approved! Logging in...', { id: 'auth-sign' })
       } catch (signError: unknown) {
+        toast.dismiss('auth-sign')
         const errorMsg = signError instanceof Error ? signError.message : String(signError)
         if (errorMsg.includes('cancel') ||
             errorMsg.includes('reject') ||

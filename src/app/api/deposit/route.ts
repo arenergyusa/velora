@@ -79,7 +79,7 @@ export async function POST(request: Request) {
 
       // Verify the transferred amount is sufficient
       const actualWei = BigInt(transferLog.data)
-      const expectedWei = parseUnits(Number(amountNative || 0).toFixed(6), 18) // BSC TRX uses 18 decimals
+      const expectedWei = parseUnits(Number(amountNative || 0).toFixed(6), 6) // BSC TRX uses 6 decimals
 
       // Allow a small 1% margin of error for precision differences
       const margin = expectedWei / BigInt(100)

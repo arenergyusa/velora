@@ -42,10 +42,10 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-muted p-4 relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-sky-200/50 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-emerald-200/50 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-accent/20 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -53,30 +53,30 @@ export default function AuthPage() {
         transition={{ duration: 0.4, type: 'spring' }}
         className="relative z-10 w-full max-w-md mx-auto"
       >
-        <div className="rounded-2xl border border-border/60 bg-white/80 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl shadow-2xl overflow-hidden">
           {/* Header gradient bar */}
-          <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-sky-500 to-blue-600" />
+          <div className="h-1.5 bg-gradient-to-r from-primary via-accent to-primary" />
 
           <div className="p-8">
             {/* Icon */}
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <div className="absolute inset-0 bg-sky-500/20 rounded-full blur-xl animate-pulse" />
-                <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-sky-500/20 to-emerald-500/20 border border-sky-500/30 flex items-center justify-center">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+                <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center">
                   {!safeIsConnected ? (
-                    <Wallet className="h-8 w-8 text-sky-500" />
+                    <Wallet className="h-8 w-8 text-primary" />
                   ) : (
-                    <Fingerprint className="h-8 w-8 text-emerald-500" />
+                    <Fingerprint className="h-8 w-8 text-primary" />
                   )}
                 </div>
               </div>
             </div>
 
             {/* Title */}
-            <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">
+            <h2 className="text-2xl font-bold text-center text-foreground mb-2">
               {!safeIsConnected ? 'Connect Wallet' : 'Verify Ownership'}
             </h2>
-            <p className="text-sm text-center text-slate-500 mb-8 px-4">
+            <p className="text-sm text-center text-muted-foreground mb-8 px-4">
               {!safeIsConnected 
                 ? 'Connect your Binance Smart Chain wallet to access the dashboard.' 
                 : 'Sign a message to securely login to your account. This is free.'}
@@ -91,9 +91,9 @@ export default function AuthPage() {
                   exit={{ opacity: 0, height: 0 }}
                   className="mb-6"
                 >
-                  <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 flex items-start gap-2.5">
-                    <AlertCircle className="h-4 w-4 text-rose-500 mt-0.5 shrink-0" />
-                    <p className="text-sm text-rose-600">{safeAuthError}</p>
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 flex items-start gap-2.5">
+                    <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                    <p className="text-sm text-destructive">{safeAuthError}</p>
                   </div>
                 </motion.div>
               )}
@@ -104,7 +104,7 @@ export default function AuthPage() {
                 <Button
                   onClick={() => connect()}
                   disabled={safeIsConnecting}
-                  className="w-full h-12 text-base font-semibold rounded-xl bg-sky-600 hover:bg-sky-700 text-white shadow-lg shadow-sky-500/20 transition-all duration-300"
+                  className="w-full h-12 text-base font-semibold rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300"
                 >
                   {safeIsConnecting ? (
                     <Loader2 className="h-5 w-5 animate-spin mr-2" />
@@ -117,7 +117,7 @@ export default function AuthPage() {
                 <Button
                   variant="ghost"
                   onClick={() => router.push('/')}
-                  className="w-full text-slate-500 hover:text-slate-800"
+                  className="w-full text-muted-foreground hover:text-foreground"
                 >
                   Return to Home
                 </Button>
@@ -125,20 +125,20 @@ export default function AuthPage() {
             ) : (
               <div className="space-y-6">
                 {/* Connected Wallet Info */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-xl border border-border bg-muted p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-bold text-sm shadow-sm">
                       B
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-500 font-medium">Connected Wallet</p>
-                      <p className="text-sm font-mono font-bold text-slate-800 truncate">
+                      <p className="text-xs text-muted-foreground font-medium">Connected Wallet</p>
+                      <p className="text-sm font-mono font-bold text-foreground truncate">
                         {safeAddress ? formatAddress(safeAddress) : ''}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-100 rounded-full">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Connected</span>
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-primary/20 rounded-full">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                      <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Connected</span>
                     </div>
                   </div>
                 </div>
@@ -146,7 +146,7 @@ export default function AuthPage() {
                 <Button
                   onClick={signIn}
                   disabled={safeIsAuthenticating || safeIsAuthenticated}
-                  className="w-full h-12 text-base font-semibold rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/20 transition-all duration-300 disabled:opacity-60"
+                  className="w-full h-12 text-base font-semibold rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 disabled:opacity-60"
                 >
                   {safeIsAuthenticating || safeIsAuthenticated ? (
                     <span className="flex items-center gap-2">
@@ -165,17 +165,17 @@ export default function AuthPage() {
                 {/* Disconnect option */}
                 <button
                   onClick={() => disconnect()}
-                  className="w-full text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors text-center py-1"
+                  className="w-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors text-center py-1"
                 >
                   Use a different wallet
                 </button>
 
                 {/* Security notice */}
-                <div className="pt-5 border-t border-slate-100">
+                <div className="pt-5 border-t border-border/50">
                   <div className="flex items-start gap-2.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
-                    <p className="text-[13px] text-slate-500 leading-relaxed">
-                      Message signing is <span className="text-slate-800 font-semibold">completely free</span> and proves you own this wallet. No BNB is spent.
+                    <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <p className="text-[13px] text-muted-foreground leading-relaxed">
+                      Message signing is <span className="text-foreground font-semibold">completely free</span> and proves you own this wallet. No BNB is spent.
                     </p>
                   </div>
                 </div>

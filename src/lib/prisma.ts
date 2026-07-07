@@ -8,7 +8,7 @@ const prismaClientSingleton = () => {
     connectionString,
     max: 15, // Maximum number of connections in the pool
     idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
-    connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection could not be established
+    connectionTimeoutMillis: 30000, // Return an error after 30 seconds if connection could not be established
   })
   const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })

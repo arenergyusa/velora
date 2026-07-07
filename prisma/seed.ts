@@ -6,9 +6,9 @@ async function main() {
 
   // 1. Seed Plan Configurations
   const plans = [
-    { name: 'Starter', minDepositUsd: 50, maxDepositUsd: 499, monthlyRoiPct: 8, sortOrder: 1 },
-    { name: 'Professional', minDepositUsd: 500, maxDepositUsd: 4999, monthlyRoiPct: 10, sortOrder: 2 },
-    { name: 'Elite', minDepositUsd: 5000, maxDepositUsd: null, monthlyRoiPct: 12, sortOrder: 3 },
+    { name: 'Start', minDepositUsd: 50, maxDepositUsd: 499, monthlyRoiPct: 8, sortOrder: 1 },
+    { name: 'Elite', minDepositUsd: 500, maxDepositUsd: 4999, monthlyRoiPct: 10, sortOrder: 2 },
+    { name: 'Prime', minDepositUsd: 5000, maxDepositUsd: null, monthlyRoiPct: 12, sortOrder: 3 },
   ]
 
   for (const plan of plans) {
