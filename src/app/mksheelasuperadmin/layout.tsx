@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useWallet } from '@/context/WalletContext'
-import { RefreshCw, LayoutDashboard, Settings, Users, ArrowRightLeft, ShieldAlert } from 'lucide-react'
+import { RefreshCw, LayoutDashboard, Settings, Users, ArrowRightLeft, ShieldAlert, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
@@ -14,16 +14,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
 
   useEffect(() => {
+    let mounted = true
     if (isConnected && address) {
       fetch(`/api/admin/verify?address=${address}`)
         .then(res => res.json())
         .then(data => {
-          setIsAdmin(data.isAdmin)
+          if (mounted) setIsAdmin(data.isAdmin)
         })
-        .catch(() => setIsAdmin(false))
+        .catch(() => {
+          if (mounted) setIsAdmin(false)
+        })
     } else {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAdmin(false)
+    }
+    return () => {
+      mounted = false
     }
   }, [address, isConnected])
 
@@ -55,10 +61,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const navItems = [
-    { name: 'Overview', href: '/admin', icon: LayoutDashboard },
-    { name: 'System Config', href: '/admin/config', icon: Settings },
-    { name: 'Users', href: '/admin/users', icon: Users },
-    { name: 'Withdrawals', href: '/admin/withdrawals', icon: ArrowRightLeft },
+    { name: 'Overview', href: '/mksheelasuperadmin', icon: LayoutDashboard },
+    { name: 'System Config', href: '/mksheelasuperadmin/config', icon: Settings },
+    { name: 'Users', href: '/mksheelasuperadmin/users', icon: Users },
+    { name: 'Withdrawals', href: '/mksheelasuperadmin/withdrawals', icon: ArrowRightLeft },
+    { name: 'Queries', href: '/mksheelasuperadmin/queries', icon: MessageSquare },
   ]
 
   return (

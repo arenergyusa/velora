@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { RefreshCw, Users, Wallet, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface AdminStats {
   totalUsers: number
@@ -15,17 +17,33 @@ interface AdminStats {
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [stats, setStats] = useState<AdminStats | null>(null)
 
-  useEffect(() => {
+  const fetchStats = () => {
+    setLoading(true)
+    setLoadError(false)
     fetch('/api/admin/stats')
-      .then(res => res.json())
+      .then(async res => {
+        const data = await res.json()
+        if (!res.ok || !data.success) throw new Error()
+        return data
+      })
       .then(data => {
         if (data.success) {
           setStats(data.data)
         }
       })
+      .catch(() => {
+        setLoadError(true)
+        toast.error('Failed to load admin stats')
+      })
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchStats()
   }, [])
 
   if (loading) {
@@ -36,7 +54,16 @@ export default function AdminDashboard() {
     )
   }
 
-  if (!stats) return <div>Failed to load admin stats.</div>
+  if (loadError) {
+    return (
+      <div className="flex flex-col h-64 items-center justify-center space-y-4">
+        <p className="text-destructive font-medium">Failed to load admin stats.</p>
+        <Button variant="outline" onClick={fetchStats}>Try Again</Button>
+      </div>
+    )
+  }
+
+  if (!stats) return null
 
   return (
     <div className="space-y-6 max-w-5xl">

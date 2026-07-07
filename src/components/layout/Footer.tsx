@@ -73,13 +73,6 @@ export default function Footer() {
           <p className="text-xs font-medium text-muted-foreground">
             &copy; {currentYear} Velora. All rights reserved.
           </p>
-          <div className="flex items-center space-x-2 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/70 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
-            <span className="text-[11px] font-bold text-primary uppercase tracking-wide">Systems Online</span>
-          </div>
         </div>
       </div>
     </footer>

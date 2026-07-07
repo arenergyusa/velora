@@ -10,6 +10,7 @@ let globalRatelimit: Ratelimit | null = null
 let authRatelimit: Ratelimit | null = null
 let financialRatelimit: Ratelimit | null = null
 let contactRatelimit: Ratelimit | null = null
+let adminRatelimit: Ratelimit | null = null
 
 if (hasRedisConfig) {
   const redis = Redis.fromEnv()
@@ -39,6 +40,13 @@ if (hasRedisConfig) {
   contactRatelimit = new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(2, '60 s'),
+    analytics: true,
+  })
+
+  // 10 requests per 30 seconds for Admin API
+  adminRatelimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(10, '30 s'),
     analytics: true,
   })
 }
@@ -83,6 +91,8 @@ export async function middleware(request: NextRequest) {
       limitResult = await financialRatelimit!.limit(ip)
     } else if (path.startsWith('/api/contact')) {
       limitResult = await contactRatelimit!.limit(ip)
+    } else if (path.startsWith('/api/admin/')) {
+      limitResult = await adminRatelimit!.limit(ip)
     } else if (path.startsWith('/api/')) {
       limitResult = await globalRatelimit!.limit(ip)
     }

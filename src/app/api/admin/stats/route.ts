@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyAdminSession } from '@/lib/auth/admin'
 
 export async function GET() {
   try {
+    const adminCheck = await verifyAdminSession()
+    if (adminCheck.error) {
+      return NextResponse.json({ error: adminCheck.error }, { status: adminCheck.status })
+    }
+
     const totalUsers = await prisma.user.count()
     const activeUsers = await prisma.user.count({ where: { status: { in: ['ACTIVE', 'WORKING'] } } })
     
@@ -36,7 +42,8 @@ export async function GET() {
         pendingWithdrawalsCount: pendingWithdrawalCount
       }
     })
-  } catch {
+  } catch (error) {
+    console.error('Admin Stats API Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

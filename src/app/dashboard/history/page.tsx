@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ArrowDownToLine, ArrowUpFromLine, RefreshCw, ExternalLink, Layers, Gift, Activity, Search } from 'lucide-react'
+import { ArrowDownToLine, ArrowUpFromLine, RefreshCw, Layers, Gift, Activity, Search } from 'lucide-react'
 import { useWallet } from '@/context/WalletContext'
 import { format } from 'date-fns'
-import Link from 'next/link'
 
 type TabType = 'ALL' | 'DEPOSITS' | 'WITHDRAWALS' | 'INVESTMENTS' | 'ROI' | 'LEVEL_COMMISSION' | 'SALARY'
 
@@ -12,7 +11,7 @@ interface Transaction {
   id: string
   txType: string
   amountUsd?: number
-  amountNative?: number
+  amountTrx?: number
   feeUsd?: number
   depositUsd?: number
   cycleNumber?: number
@@ -143,7 +142,7 @@ export default function HistoryPage() {
           title: 'Deposit',
           amount: `+$${Number(tx.amountUsd).toFixed(2)}`,
           amountClass: 'text-primary',
-          desc: `TRX Equivalent: ${Number(tx.amountNative).toFixed(2)} TRX`,
+          desc: `TRX Equivalent: ${Number(tx.amountTrx).toFixed(2)} TRX`,
           status: tx.status
         }
       case 'WITHDRAWAL':
@@ -261,11 +260,7 @@ export default function HistoryPage() {
                         {details.amount}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        {tx.txHash && (
-                          <Link href={`https://bscscan.com/tx/${tx.txHash}`} target="_blank" className="text-xs text-primary hover:text-primary font-bold flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded-md">
-                            Explorer <ExternalLink className="w-3 h-3" />
-                          </Link>
-                        )}
+
                         <span className={`px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wider ${details.status === 'COMPLETED' ? 'bg-emerald-900/30 text-emerald-500 border border-emerald-900/50' :
                           details.status === 'ACTIVE' || details.status === 'CAPPED' || details.status === 'RETOPED' ? 'bg-primary/10 text-primary border border-primary/20' :
                             details.status === 'PENDING' ? 'bg-accent/20 text-accent border border-accent/30' :
