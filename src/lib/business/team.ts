@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function getTeamBusiness(userId: string) {
   // 1. Run independent initial queries in parallel
-  const [directReferrals, configs] = await Promise.all([
+  const [directReferrals, configs, teamIncomeAgg] = await Promise.all([
     prisma.user.findMany({
       where: { referredBy: userId },
       include: {
@@ -16,6 +16,15 @@ export async function getTeamBusiness(userId: string) {
     prisma.levelConfig.findMany({
       where: { isActive: true },
       orderBy: { level: 'asc' }
+    }),
+    prisma.earning.aggregate({
+      where: {
+        userId,
+        type: { in: ['LEVEL_COMMISSION'] }
+      },
+      _sum: {
+        amountUsd: true
+      }
     })
   ])
 
@@ -31,6 +40,9 @@ export async function getTeamBusiness(userId: string) {
   const levelStats = []
   let currentLevelIds = [userId]
   const pctMap = new Map(configs.map(c => [c.level, Number(c.commissionPct)]))
+  
+  let totalMembers = 0
+  let activeMembers = 0
 
   for (let i = 1; i <= 10; i++) {
     if (currentLevelIds.length === 0) {
@@ -38,19 +50,41 @@ export async function getTeamBusiness(userId: string) {
       continue
     }
 
-    // Find users whose referredBy is in currentLevelIds
+    // Find all users in next level
     const nextLevelUsers = await prisma.user.findMany({
       where: {
-        referredBy: { in: currentLevelIds },
-        status: { in: ['ACTIVE', 'WORKING'] }
+        referredBy: { in: currentLevelIds }
       },
-      select: { id: true }
+      select: { 
+        id: true, 
+        status: true,
+        walletAddress: true,
+        createdAt: true,
+        cycles: {
+          orderBy: { cycleNumber: 'desc' },
+          take: 1,
+          select: { depositUsd: true, totalEarned: true }
+        }
+      }
     })
+    
+    const activeInLevel = nextLevelUsers.filter(u => ['ACTIVE', 'WORKING'].includes(u.status))
+
+    totalMembers += nextLevelUsers.length
+    activeMembers += activeInLevel.length
 
     levelStats.push({ 
       level: i, 
-      users: nextLevelUsers.length,
-      commission: pctMap.get(i) || 0
+      users: activeInLevel.length, // Keep for backward compatibility
+      totalUsers: nextLevelUsers.length,
+      commission: pctMap.get(i) || 0,
+      members: nextLevelUsers.map(u => ({
+        address: u.walletAddress,
+        status: u.status,
+        joinedAt: u.createdAt,
+        deposit: u.cycles.length > 0 ? Number(u.cycles[0].depositUsd) : 0,
+        earned: u.cycles.length > 0 ? Number(u.cycles[0].totalEarned) : 0
+      }))
     })
 
     currentLevelIds = nextLevelUsers.map(u => u.id)
@@ -64,11 +98,16 @@ export async function getTeamBusiness(userId: string) {
     if (dr.team === 'LEFT') leftBiz += dr.deposit
     if (dr.team === 'RIGHT') rightBiz += dr.deposit
   }
+  
+  const totalTeamIncome = Number(teamIncomeAgg._sum.amountUsd || 0)
 
   return {
     directReferrals: formattedDirects,
     levelStats,
     leftBiz,
-    rightBiz
+    rightBiz,
+    totalMembers,
+    activeMembers,
+    totalTeamIncome
   }
 }

@@ -93,10 +93,10 @@ export default function HelpSupport() {
                 <div className="glass-card p-6 rounded-2xl border border-border/50 space-y-3">
                   <div className="flex items-center space-x-2">
                     <MessageCircle className="w-5 h-5 text-primary" />
-                    <h3 className="font-bold text-foreground">Chat with us</h3>
+                    <h3 className="font-bold text-foreground">Send us a message</h3>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Join our Telegram community where our team and other members can help you in real-time. Most questions get answered within minutes.
+                    Head over to our Contact page to fill out our support form. We read every single message and usually respond within a few hours.
                   </p>
                 </div>
                 <div className="glass-card p-6 rounded-2xl border border-border/50 space-y-3">

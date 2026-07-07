@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       let signature: string
       try {
         signature = await signMessageAsync({ message })
-        toast.success('Signature approved! Logging in...', { id: 'auth-sign' })
+        toast.loading('Signature approved! Logging in...', { id: 'auth-sign' })
       } catch (signError: unknown) {
         toast.dismiss('auth-sign')
         const errorMsg = signError instanceof Error ? signError.message : String(signError)
@@ -161,6 +161,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error(authData.error || 'Authentication failed')
       }
 
+      toast.success('Successfully logged in!', { id: 'auth-sign' })
+
       setUser(authData.user)
       authenticatedAddressRef.current = address
 
@@ -170,6 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error: unknown) {
       console.error('Sign-in error:', error)
+      toast.error(error instanceof Error ? error.message : 'Authentication failed', { id: 'auth-sign' })
       setAuthError(error instanceof Error ? error.message : 'Authentication failed')
     } finally {
       setIsAuthenticating(false)
