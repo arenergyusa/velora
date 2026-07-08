@@ -5,6 +5,7 @@ import { ArrowUpFromLine, RefreshCw, Wallet, AlertCircle, ArrowRight, ShieldChec
 import { toast } from 'sonner'
 import useSWR, { mutate } from 'swr'
 import { useWallet } from '@/context/WalletContext'
+import { useAuth } from '@/context/AuthContext'
 
 export default function WithdrawClient({
   fallbackStats,
@@ -15,12 +16,13 @@ export default function WithdrawClient({
   fallbackConfig?: unknown,
   serverAddress?: string
 }) {
-  const { address, isConnected } = useWallet()
+  const { address, isConnected, connect } = useWallet()
+  const { user: authUser, walletMismatch } = useAuth()
   const [amountUsd, setAmountUsd] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [trxPriceUsd, setTrxPriceUsd] = useState<number>(0.15)
 
-  const activeAddress = (isConnected && address) || serverAddress
+  const activeAddress = authUser?.walletAddress || serverAddress
 
   // SWR for user stats
   const { data: resData, mutate: mutateStats, isLoading: isLoadingStats } = useSWR(
@@ -75,6 +77,17 @@ export default function WithdrawClient({
   }
 
   const handleWithdraw = async () => {
+    if (!isConnected || !address) {
+      toast.info('Please connect your wallet to verify ownership for withdrawal.')
+      connect()
+      return
+    }
+
+    if (walletMismatch) {
+      toast.error('Wallet mismatch. Please connect with your registered wallet.')
+      return
+    }
+
     if (!amountUsd || amount <= 0 || !userData?.id) return
 
     if (amount < minWithdrawalUsd) {
@@ -229,7 +242,7 @@ export default function WithdrawClient({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">Receiving Address</p>
-                  <p className="text-xs sm:text-sm font-mono text-foreground truncate">{address || 'Not connected'}</p>
+                  <p className="text-xs sm:text-sm font-mono text-foreground truncate">{activeAddress}</p>
                 </div>
               </div>
 

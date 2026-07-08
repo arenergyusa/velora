@@ -98,13 +98,6 @@ export async function POST(req: Request) {
         })
 
         if (sponsor) {
-          if (sponsor.status === 'INACTIVE') {
-            return NextResponse.json(
-              { error: 'Invalid referral code. The sponsor account is not active yet.' },
-              { status: 400 }
-            )
-          }
-
           referredBy = sponsor.id
 
           // Auto alternating team assignment logic (Left/Right)
@@ -135,7 +128,7 @@ export async function POST(req: Request) {
     }
 
     // ─── Step 3: Create JWT session ───
-    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+    const expires = new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000) // 10 years
     const session = await encrypt({
       user: {
         id: user.id,

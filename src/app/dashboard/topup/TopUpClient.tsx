@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { ArrowRight, RefreshCw, Layers, ShieldCheck, DollarSign, Wallet } from 'lucide-react'
 import { toast } from 'sonner'
 import useSWR, { mutate } from 'swr'
-import { useWallet } from '@/context/WalletContext'
+import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 
 export default function TopUpClient({
@@ -16,13 +16,13 @@ export default function TopUpClient({
   fallbackPlans?: { id: string; min: number; max?: number; name: string; roi: number }[],
   serverAddress?: string
 }) {
-  const { address, isConnected } = useWallet()
+  const { user: authUser, isLoadingSession } = useAuth()
   const router = useRouter()
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [amountUsd, setAmountUsd] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const activeAddress = (isConnected && address) || serverAddress
+  const activeAddress = isLoadingSession ? null : (authUser?.walletAddress || serverAddress)
 
   const { data: resData, mutate: mutateStats } = useSWR(
     activeAddress ? `/api/user/stats?address=${activeAddress}` : null,
@@ -108,7 +108,7 @@ export default function TopUpClient({
         setAmountUsd('')
         setSelectedPlan(null)
         // Global update
-        mutate(`/api/team?address=${address}`)
+        mutate(`/api/team?address=${activeAddress}`)
         router.refresh()
       } else {
         toast.error(result.error || 'Failed to process investment')
@@ -121,12 +121,14 @@ export default function TopUpClient({
     }
   }
 
-  if (isLoadingConfig) {
+  if (isLoadingSession || isLoadingConfig) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground font-medium">Loading investment plans...</p>
+          <p className="text-muted-foreground font-medium">
+            {isLoadingSession ? 'Verifying session...' : 'Loading top-up module...'}
+          </p>
         </div>
       </div>
     )

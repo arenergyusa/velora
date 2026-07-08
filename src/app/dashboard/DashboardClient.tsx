@@ -1,7 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
-import { useWallet } from '@/context/WalletContext'
+import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 import {
   Wallet,
@@ -25,10 +25,8 @@ import CopyButton from '@/components/dashboard/CopyButton'
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function DashboardClient({ fallbackData, serverAddress }: { fallbackData?: unknown, serverAddress?: string }) {
-  const { address, isConnected } = useWallet()
-
-  // Use the connected address if available, otherwise fallback to the one from session
-  const activeAddress = (isConnected && address) || serverAddress
+  const { user: authUser } = useAuth()
+  const activeAddress = authUser?.walletAddress || serverAddress
 
   const { data: resData, isLoading } = useSWR(
     activeAddress ? `/api/user/stats?address=${activeAddress}` : null,
@@ -46,7 +44,7 @@ export default function DashboardClient({ fallbackData, serverAddress }: { fallb
   if (!activeAddress) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <p className="text-muted-foreground font-medium">Please connect your wallet to view dashboard.</p>
+        <p className="text-muted-foreground font-medium">Please login to view dashboard.</p>
       </div>
     )
   }
@@ -133,7 +131,7 @@ export default function DashboardClient({ fallbackData, serverAddress }: { fallb
               <Wallet className="w-3.5 h-3.5" /> Balance
             </div>
             <div>
-              <div className="text-sm font-medium text-muted-foreground mb-1">Available to Withdraw or Top-up</div>
+              <div className="text-sm font-medium text-muted-foreground mb-1"></div>
               <div className="text-4xl sm:text-5xl font-black tracking-tight" aria-live="polite">
                 ${stats.availableBalanceUsd.toFixed(2)}
               </div>
@@ -261,20 +259,17 @@ export default function DashboardClient({ fallbackData, serverAddress }: { fallb
           </div>
 
           <div className="relative z-10 bg-card/60 border border-border rounded-2xl p-4 backdrop-blur-md mt-4">
-            {user.status === 'INACTIVE' ? (
-              <div className="flex items-center gap-3 bg-accent/20 border border-accent/30 rounded-xl px-4 py-3">
-                <AlertCircle className="w-5 h-5 text-accent flex-shrink-0" />
-                <p className="text-xs text-accent font-medium">
-                  Your referral link is locked. Please Top-up an active plan to unlock your link and start inviting users.
-                </p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex-1 min-w-0 bg-card border border-border rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm">
+                <LinkIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                <code className="text-xs text-foreground font-mono truncate">{referralLink}</code>
               </div>
-            ) : (
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <div className="flex-1 min-w-0 bg-card border border-border rounded-xl px-4 py-3 flex items-center gap-3 shadow-sm">
-                  <LinkIcon className="w-4 h-4 text-primary flex-shrink-0" />
-                  <code className="text-xs text-foreground font-mono truncate">{referralLink}</code>
-                </div>
-                <CopyButton text={referralLink} label="Copy Link" />
+              <CopyButton text={referralLink} label="Copy Link" />
+            </div>
+            {user.status === 'INACTIVE' && (
+              <div className="mt-3 flex items-start gap-2 text-[10px] text-amber-500 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                <p>Your account is inactive. Others can join using your link, but you won&apos;t receive commissions until you Top-up.</p>
               </div>
             )}
           </div>

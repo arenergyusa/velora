@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { calculateDownlineBusiness } from '@/lib/business/salary'
 
 export async function getTeamBusiness(userId: string) {
   // 1. Run independent initial queries in parallel
@@ -95,8 +96,12 @@ export async function getTeamBusiness(userId: string) {
   let rightBiz = 0
 
   for (const dr of formattedDirects) {
-    if (dr.team === 'LEFT') leftBiz += dr.deposit
-    if (dr.team === 'RIGHT') rightBiz += dr.deposit
+    if (dr.team === 'LEFT') {
+      leftBiz += await calculateDownlineBusiness(dr.id)
+    }
+    if (dr.team === 'RIGHT') {
+      rightBiz += await calculateDownlineBusiness(dr.id)
+    }
   }
   
   const totalTeamIncome = Number(teamIncomeAgg._sum.amountUsd || 0)

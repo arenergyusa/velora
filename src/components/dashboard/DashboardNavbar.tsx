@@ -12,7 +12,7 @@ interface DashboardNavbarProps {
   userStatus?: string;
 }
 
-export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavbarProps) {
+export default function DashboardNavbar({ userStatus = 'INACTIVE' }: DashboardNavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -104,7 +104,7 @@ export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavb
               <div className="flex items-center space-x-2 bg-muted border border-border rounded-xl px-3.5 py-2 text-xs font-bold text-foreground">
                 <Wallet className="w-4 h-4 text-muted-foreground" />
                 <span>{formatAddress(address)}</span>
-                <span className={`w-2 h-2 rounded-full ml-1 ${userStatus === 'active' ? 'bg-primary' : 'bg-accent'}`} />
+                <span className={`w-2 h-2 rounded-full ml-1 ${userStatus === 'ACTIVE' || userStatus === 'WORKING' ? 'bg-primary' : 'bg-accent'}`} />
               </div>
 
               <button
@@ -153,12 +153,12 @@ export default function DashboardNavbar({ userStatus = 'active' }: DashboardNavb
                   </div>
                 </div>
                 <div className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  userStatus === 'active' 
+                  userStatus === 'ACTIVE' || userStatus === 'WORKING'
                     ? 'bg-emerald-900/30 border border-emerald-500/30 text-emerald-400' 
                     : 'bg-accent/20 border border-accent/30 text-accent'
                 }`}>
                   <ShieldCheck className="w-3 h-3" />
-                  {userStatus === 'active' ? 'Active' : 'Inactive'}
+                  {userStatus === 'ACTIVE' || userStatus === 'WORKING' ? 'Active' : 'Inactive'}
                 </div>
               </div>
             </div>

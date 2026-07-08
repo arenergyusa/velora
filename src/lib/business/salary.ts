@@ -14,7 +14,7 @@ function getCurrentMonthKey(): { year: number; month: number; key: string } {
  * Calculates total business (top-up/investments) for a user and their entire downline recursively.
  * Using a PostgreSQL Recursive CTE to prevent N+1 query performance bottlenecks.
  */
-async function calculateDownlineBusiness(userId: string): Promise<number> {
+export async function calculateDownlineBusiness(userId: string): Promise<number> {
   try {
     const result: { total: unknown }[] = await prisma.$queryRaw`
       WITH RECURSIVE downline AS (

@@ -5,6 +5,7 @@ import { ArrowDownToLine, RefreshCw, DollarSign, Coins, ShieldCheck, CheckCircle
 import { toast } from 'sonner'
 import useSWR, { mutate } from 'swr'
 import { useWallet } from '@/context/WalletContext'
+import { useAuth } from '@/context/AuthContext'
 import { useWriteContract, useConfig } from 'wagmi'
 import { waitForTransactionReceipt } from '@wagmi/core'
 import { parseUnits, isAddress, parseAbi } from 'viem'
@@ -18,7 +19,8 @@ export default function DepositClient({
   fallbackConfig?: unknown,
   serverAddress?: string
 }) {
-  const { address, isConnected } = useWallet()
+  const { address, isConnected, connect } = useWallet()
+  const { user: authUser, walletMismatch } = useAuth()
   const [amountUsd, setAmountUsd] = useState<string>('')
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -28,7 +30,7 @@ export default function DepositClient({
   const { writeContractAsync } = useWriteContract()
   const config = useConfig()
 
-  const activeAddress = (isConnected && address) || serverAddress
+  const activeAddress = authUser?.walletAddress || serverAddress
 
   // SWR for user stats
   const { data: resData } = useSWR(
@@ -73,8 +75,19 @@ export default function DepositClient({
   const minDeposit = 1;
 
   const handleDeposit = async () => {
-    if (!amountUsd || !address || !userData?.id || !masterWallet) {
-      toast.error('Wallet not connected, missing details, or system config loading.')
+    if (!isConnected || !address) {
+      toast.info('Please connect your wallet to make a deposit.')
+      connect()
+      return
+    }
+
+    if (walletMismatch) {
+      toast.error(`Wallet mismatch. Please connect with your registered wallet.`)
+      return
+    }
+
+    if (!amountUsd || !userData?.id || !masterWallet) {
+      toast.error('Missing details, or system config loading.')
       return
     }
 
@@ -148,7 +161,7 @@ export default function DepositClient({
         toast.success(`Successfully deposited $${amount.toFixed(2)} to your Internal Balance!`, { id: 'tx-toast' })
         setAmountUsd('')
         // Optimistic UI Update: Revalidate dashboard stats across the app
-        mutate(`/api/user/stats?address=${address}`)
+        mutate(`/api/user/stats?address=${activeAddress}`)
       } else {
         toast.error(result.error || 'Failed to save deposit record', { id: 'tx-toast' })
       }

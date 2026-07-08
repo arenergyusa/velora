@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { ArrowDownToLine, ArrowUpFromLine, RefreshCw, Layers, Gift, Activity, Search } from 'lucide-react'
-import { useWallet } from '@/context/WalletContext'
+import { useAuth } from '@/context/AuthContext'
 import { format } from 'date-fns'
 
 type TabType = 'ALL' | 'DEPOSITS' | 'WITHDRAWALS' | 'INVESTMENTS' | 'ROI' | 'LEVEL_COMMISSION' | 'SALARY'
@@ -25,7 +25,8 @@ interface Transaction {
 }
 
 export default function HistoryPage() {
-  const { address, isConnected } = useWallet()
+  const { user: authUser, isLoadingSession } = useAuth()
+  const activeAddress = isLoadingSession ? null : authUser?.walletAddress
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('ALL')
 
@@ -37,13 +38,13 @@ export default function HistoryPage() {
   const observerTarget = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (isConnected && address) {
+    if (activeAddress) {
       const fetchTransactions = async () => {
         try {
           if (page === 1) setLoading(true)
           else setLoadingMore(true)
 
-          const res = await fetch(`/api/user/history?address=${address}&limit=20&page=${page}&type=${activeTab}`)
+          const res = await fetch(`/api/user/history?address=${activeAddress}&limit=20&page=${page}&type=${activeTab}`)
           const data = await res.json()
 
           if (data.success) {
@@ -63,7 +64,7 @@ export default function HistoryPage() {
       }
       fetchTransactions()
     }
-  }, [isConnected, address, page, activeTab])
+  }, [activeAddress, page, activeTab])
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -94,10 +95,21 @@ export default function HistoryPage() {
     setHasMore(true)
   }
 
-  if (!isConnected) {
+  if (isLoadingSession) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <p className="text-muted-foreground font-medium">Please connect your wallet to view history.</p>
+        <div className="flex flex-col items-center gap-3">
+          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground font-medium">Verifying session...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!activeAddress) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <p className="text-muted-foreground font-medium">Please login to view history.</p>
       </div>
     )
   }

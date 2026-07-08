@@ -18,7 +18,9 @@ interface AuthContextType {
   user: AuthUser | null
   isAuthenticated: boolean
   isAuthenticating: boolean
+  isLoadingSession: boolean
   authError: string | null
+  walletMismatch: boolean
   signIn: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -27,7 +29,9 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isAuthenticating: false,
+  isLoadingSession: true,
   authError: null,
+  walletMismatch: false,
   signIn: async () => {},
   signOut: async () => {},
 })
@@ -38,12 +42,15 @@ export const useAuth = () => useContext(AuthContext)
 
 // ─── Provider ───
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { address, isConnected, isConnecting } = useWallet()
+  const { address, isConnected } = useWallet()
   const { signMessageAsync } = useSignMessage()
 
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isAuthenticating, setIsAuthenticating] = useState(false)
+  const [isLoadingSession, setIsLoadingSession] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
+
+  const walletMismatch = Boolean(isConnected && address && user && address.toLowerCase() !== user.walletAddress.toLowerCase())
 
   // Track which address we've already authenticated for
   const authenticatedAddressRef = useRef<string | null>(null)
@@ -54,7 +61,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ─── Check existing session on mount ───
   useEffect(() => {
     // Skip session check on the landing page
-    if (pathname === '/') return;
+    if (pathname === '/') {
+      // eslint-disable-next-line
+      setIsLoadingSession(false)
+      return;
+    }
 
     const checkSession = async () => {
       try {
@@ -79,6 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (err instanceof Error && !err.message.includes('404')) {
           console.error('Session check failed:', err)
         }
+      } finally {
+        setIsLoadingSession(false)
       }
     }
     checkSession()
@@ -192,25 +205,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthError(null)
   }, [])
 
-  // ─── Auto sign-out when wallet disconnects ───
-  const wasConnectedRef = useRef(false)
-  useEffect(() => {
-    if (isConnected) wasConnectedRef.current = true
-  }, [isConnected])
-
-  useEffect(() => {
-    // Only auto-sign out if we were previously connected and now we're not
-    if (wasConnectedRef.current && !isConnected && !isConnecting && user) {
-      signOut()
-    }
-  }, [isConnected, isConnecting, user, signOut])
-
-  // ─── If wallet address changes (switched account), clear auth ───
-  useEffect(() => {
-    if (isConnected && address && authenticatedAddressRef.current && address !== authenticatedAddressRef.current) {
-      signOut()
-    }
-  }, [address, isConnected, signOut])
+  // ─── Wallet Mismatch Detection ───
+  // (Derived state calculated above)
 
   return (
     <AuthContext.Provider
@@ -218,7 +214,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isAuthenticated: !!user,
         isAuthenticating,
+        isLoadingSession,
         authError,
+        walletMismatch,
         signIn,
         signOut,
       }}

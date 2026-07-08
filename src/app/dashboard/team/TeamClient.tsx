@@ -3,17 +3,17 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 import { GitCommitVertical, BadgePercent, RefreshCw, Users, UserCheck, DollarSign, Wallet, ChevronDown, ChevronUp } from 'lucide-react'
-import { useWallet } from '@/context/WalletContext'
+import { useAuth } from '@/context/AuthContext'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function TeamClient({ fallbackData, serverAddress }: { fallbackData?: unknown, serverAddress?: string }) {
-  const { address, isConnected } = useWallet()
+  const { user: authUser, isLoadingSession } = useAuth()
   
   const [expandedLevel, setExpandedLevel] = useState<number | null>(null)
   const [activeTab, setActiveTab] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE')
 
-  const activeAddress = (isConnected && address) || serverAddress
+  const activeAddress = authUser?.walletAddress || serverAddress
 
   const { data: resData, isLoading } = useSWR(
     activeAddress ? `/api/team?address=${activeAddress}` : null,
@@ -27,6 +27,17 @@ export default function TeamClient({ fallbackData, serverAddress }: { fallbackDa
 
   const loading = !fallbackData && isLoading
   const teamData = resData?.success ? resData.data : null
+
+  if (isLoadingSession) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground font-medium">Verifying session...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!activeAddress) {
     return (
