@@ -46,6 +46,7 @@ model Withdrawal {
   userId      String
   amountUsd   Decimal
   amountTrx   Decimal
+  feeUsd      Decimal  @default(0)
   trxPriceUsd Decimal
   txHash      String?
   status      TxStatus @default(PENDING)

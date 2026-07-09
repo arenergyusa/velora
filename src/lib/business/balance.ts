@@ -36,9 +36,23 @@ export async function getUserBalance(userId: string) {
       where: { userId, status: 'ACTIVE' },
       orderBy: { cycleNumber: 'desc' }
     }),
-    prisma.user.count({
-      where: { referredBy: userId, status: { in: ['ACTIVE', 'WORKING'] } }
-    })
+    prisma.$queryRaw<{ count: number }[]>`
+      WITH RECURSIVE downline AS (
+        SELECT id, "referredBy", 1 as level, status
+        FROM "User"
+        WHERE "referredBy" = ${userId}
+        
+        UNION ALL
+        
+        SELECT u.id, u."referredBy", d.level + 1, u.status
+        FROM "User" u
+        INNER JOIN downline d ON u."referredBy" = d.id
+        WHERE d.level < 10
+      )
+      SELECT count(*)::int as count
+      FROM downline
+      WHERE status IN ('ACTIVE', 'WORKING')
+    `
   ])
 
   const totalEarnedUsd = Number(earnings._sum.amountUsd || 0)
@@ -69,6 +83,6 @@ export async function getUserBalance(userId: string) {
     activeDepositUsd: Number(activeCycle?.depositUsd || 0),
     maxEarning: Number(activeCycle?.maxEarning || 0),
     currentCycleEarned: Number(activeCycle?.totalEarned || 0),
-    networkSize
+    networkSize: networkSize[0]?.count || 0
   }
 }

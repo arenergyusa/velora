@@ -103,6 +103,7 @@ export async function POST(request: Request) {
         userId,
         amountUsd: amount,
         amountTrx: finalAmountTrx,
+        feeUsd: feeAmount,
         trxPriceUsd: trxPriceUsd,
         txHash,
         status: 'CONFIRMED',

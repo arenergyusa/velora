@@ -9,7 +9,7 @@ const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function TeamClient({ fallbackData, serverAddress }: { fallbackData?: unknown, serverAddress?: string }) {
   const { user: authUser, isLoadingSession } = useAuth()
-  
+
   const [expandedLevel, setExpandedLevel] = useState<number | null>(null)
   const [activeTab, setActiveTab] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE')
 
@@ -123,7 +123,7 @@ export default function TeamClient({ fallbackData, serverAddress }: { fallbackDa
             <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <DollarSign className="w-5 h-5" />
             </div>
-            <p className="text-sm font-medium text-muted-foreground">Team Income</p>
+            <p className="text-sm font-medium text-muted-foreground">Level Income</p>
           </div>
           <p className="text-2xl sm:text-3xl font-black text-foreground">${Number(totalTeamIncome).toFixed(2)}</p>
         </div>
@@ -215,40 +215,40 @@ export default function TeamClient({ fallbackData, serverAddress }: { fallbackDa
                   const isExpanded = expandedLevel === stat.level
                   const totalLevelUsers = stat.totalUsers ?? stat.users
                   const members = stat.members || []
-                  
+
                   const activeCount = members.filter(m => ['ACTIVE', 'WORKING'].includes(m.status)).length
                   const inactiveCount = members.filter(m => !['ACTIVE', 'WORKING'].includes(m.status)).length
-                  
+
                   const displayMembers = members.filter(m => activeTab === 'ACTIVE' ? ['ACTIVE', 'WORKING'].includes(m.status) : !['ACTIVE', 'WORKING'].includes(m.status))
 
                   return (
                     <div key={stat.level} className="flex flex-col rounded-2xl border border-border/50 hover:border-border transition-colors group overflow-hidden bg-card">
-                      <div 
-                        className="flex items-center justify-between p-3 cursor-pointer"
+                      <div
+                        className="flex items-center justify-between p-3 cursor-pointer gap-2"
                         onClick={() => {
                           setExpandedLevel(isExpanded ? null : stat.level)
                           setActiveTab('ACTIVE')
                         }}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-black group-hover:bg-accent/20 group-hover:text-accent transition-colors">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-black group-hover:bg-accent/20 group-hover:text-accent transition-colors shrink-0">
                             L{stat.level}
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-foreground">
-                              {totalLevelUsers} Total Members
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-foreground truncate">
+                              {totalLevelUsers} Members
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {stat.users} Active Users
+                            <p className="text-xs text-muted-foreground truncate">
+                              {stat.users} Active
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          <div className="px-3 py-1 bg-primary text-primary-foreground rounded-xl">
+                        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                          <div className="px-2 sm:px-3 py-1 bg-primary text-primary-foreground rounded-xl">
                             <span className="text-sm font-bold">{stat.commission}%</span>
                           </div>
-                          {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground group-hover:text-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />}
+                          {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground group-hover:text-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-foreground shrink-0" />}
                         </div>
                       </div>
 
@@ -292,7 +292,7 @@ export default function TeamClient({ fallbackData, serverAddress }: { fallbackDa
                                 </div>
                               </div>
                             ))}
-                            
+
                             {displayMembers.length === 0 && (
                               <p className="text-sm text-muted-foreground text-center py-6">
                                 No {activeTab.toLowerCase()} users found in this level.
