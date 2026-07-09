@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { distributeRoiLevelCommissions } from '@/lib/business/commission'
+import { calculateRoiLevelCommissions } from '@/lib/business/commission'
 
 /**
  * Get today's date at UTC midnight
@@ -34,10 +34,19 @@ export async function processDailyROI() {
     const plans = await prisma.planConfig.findMany()
     const planMap = new Map(plans.map(p => [p.id, p]))
 
+    const levelConfigs = await prisma.levelConfig.findMany()
+    const pctMap = new Map<number, number>()
+    levelConfigs.forEach(conf => {
+      if (conf.isActive) pctMap.set(conf.level, Number(conf.commissionPct))
+    })
+
     let processedCount = 0
     let skippedCount = 0
     let errorCount = 0
     let catchUpDays = 0
+
+    // aggregatedCommissions map: uplineId -> total combined USD to pay out
+    const aggregatedCommissions = new Map<string, number>()
 
     for (const cycle of activeCycles) {
       try {
@@ -54,45 +63,39 @@ export async function processDailyROI() {
           orderBy: { createdAt: 'desc' }
         })
 
-        // Determine how many days of ROI we need to process
         let daysToProcess: number
 
         if (lastRoi) {
           daysToProcess = getMissedDays(lastRoi.createdAt, today)
         } else {
-          // First ROI ever for this cycle — start from cycle start date
+          // ROI is calculated starting from the day AFTER the cycle starts
           daysToProcess = getMissedDays(cycle.startedAt, today)
-          // At minimum 1 day (today), but not the creation day itself since 
-          // cycle was just created — ROI starts from the next day
           if (daysToProcess === 0) {
-            // Cycle was created today — no ROI yet (ROI starts from next day)
             skippedCount++
             continue
           }
         }
 
         if (daysToProcess <= 0) {
-          // Already processed today
           skippedCount++
           continue
         }
 
-        // Cap at reasonable max to prevent abuse (e.g., max 30 days catch-up)
+        // Cap at reasonable max to prevent abuse
         const maxCatchUpDays = 30
         daysToProcess = Math.min(daysToProcess, maxCatchUpDays)
 
-        // Monthly ROI is given in percentage (e.g., 8, 10, 12)
-        // Daily ROI = (Deposit * Monthly_PCT / 100) / 30
         const depositAmount = Number(cycle.depositUsd)
         const monthlyPct = Number(plan.monthlyRoiPct)
         const dailyRoiAmount = (depositAmount * (monthlyPct / 100)) / 30
 
         if (dailyRoiAmount <= 0) continue
 
-        // Process ROI for each missed day
         let currentTotal = Number(cycle.totalEarned)
         const maxCap = Number(cycle.maxEarning)
         let isCapped = false
+        
+        let totalDailyRoiPaid = 0
 
         for (let dayOffset = daysToProcess; dayOffset >= 1; dayOffset--) {
           if (isCapped) break
@@ -109,7 +112,6 @@ export async function processDailyROI() {
             break
           }
 
-          // Calculate the date this ROI belongs to
           const roiDate = new Date(today.getTime() - (dayOffset - 1) * 24 * 60 * 60 * 1000)
           const roiDateKey = roiDate.toISOString().slice(0, 10)
 
@@ -120,20 +122,29 @@ export async function processDailyROI() {
               amountUsd: payout,
               cycleNumber: cycle.cycleNumber,
               description: `Daily ROI (${monthlyPct}% monthly plan) - ${roiDateKey}`,
-              createdAt: roiDate // Set the correct date for each day's ROI
+              createdAt: roiDate 
             }
           })
-
-          // Give 10-level ROI commission to upline based on this daily ROI payout
-          try {
-            await distributeRoiLevelCommissions(cycle.userId, payout)
-          } catch (e) {
-            console.error('Failed to distribute ROI level commissions', e)
-          }
-
+          
+          totalDailyRoiPaid += payout
           currentTotal += payout
 
           if (dayOffset > 1) catchUpDays++
+        }
+
+        // Calculate and aggregate ROI level commissions for whatever ROI they got today
+        if (totalDailyRoiPaid > 0) {
+          try {
+            const payouts = await calculateRoiLevelCommissions(cycle.userId, totalDailyRoiPaid, pctMap)
+            for (const p of payouts) {
+              const currentAgg = aggregatedCommissions.get(p.uplineId) || 0
+              aggregatedCommissions.set(p.uplineId, currentAgg + p.amountUsd)
+            }
+          } catch (e) {
+            console.error('Failed to calculate ROI level commissions', e)
+            errorCount++
+            continue // Skip updating the cycle so it can be retried later
+          }
         }
 
         // Update cycle total in one shot
@@ -149,8 +160,66 @@ export async function processDailyROI() {
         processedCount++
 
       } catch (userError) {
-        // Individual user error — log and continue with next user
         console.error(`Error processing ROI for user ${cycle.userId}, cycle ${cycle.id}:`, userError)
+        errorCount++
+      }
+    }
+
+    // Process aggregated ROI_LEVEL_COMMISSIONS
+    for (const [uplineId, totalCommission] of Array.from(aggregatedCommissions.entries())) {
+      try {
+        const uplineCycle = await prisma.userCycle.findFirst({
+          where: { userId: uplineId, status: 'ACTIVE' },
+          orderBy: { cycleNumber: 'desc' }
+        })
+
+        if (uplineCycle) {
+          const currentTotal = Number(uplineCycle.totalEarned)
+          const maxCap = Number(uplineCycle.maxEarning)
+
+          let payout = totalCommission
+          let cappedStatus = false
+
+          if (currentTotal + payout >= maxCap) {
+            payout = Math.max(0, maxCap - currentTotal)
+            cappedStatus = true
+          }
+
+          if (payout > 0) {
+            await prisma.$transaction([
+              ...(cappedStatus ? [
+                prisma.userCycle.update({
+                  where: { id: uplineCycle.id },
+                  data: { status: 'CAPPED', cappedAt: new Date() }
+                })
+              ] : []),
+              prisma.earning.create({
+                data: {
+                  userId: uplineId,
+                  type: 'ROI_LEVEL_COMMISSION',
+                  amountUsd: payout,
+                  cycleNumber: uplineCycle.cycleNumber,
+                  description: `Daily Team ROI Commission - ${todayKey}`,
+                  createdAt: today
+                }
+              }),
+              prisma.userCycle.update({
+                where: { id: uplineCycle.id },
+                data: {
+                  totalEarned: { increment: payout }
+                }
+              })
+            ])
+          } else if (cappedStatus) {
+            // Already capped or just hit cap without any new payout
+            await prisma.userCycle.update({
+              where: { id: uplineCycle.id },
+              data: { status: 'CAPPED', cappedAt: new Date() }
+            })
+          }
+        }
+      } catch (e) {
+        console.error(`Error processing aggregated commission for upline ${uplineId}:`, e)
         errorCount++
       }
     }

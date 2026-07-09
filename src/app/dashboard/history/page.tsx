@@ -172,7 +172,7 @@ export default function HistoryPage() {
           title: `Top-up`,
           amount: `-$${Number(tx.depositUsd).toFixed(2)}`,
           amountClass: 'text-primary',
-          desc: `Cycle #${tx.cycleNumber} - Max Earn: $${Number(tx.maxEarning).toFixed(2)}`,
+          desc: '',
           status: tx.status
         }
       case 'ROI':
@@ -180,23 +180,23 @@ export default function HistoryPage() {
           title: `ROI`,
           amount: `+$${Number(tx.amountUsd).toFixed(2)}`,
           amountClass: 'text-primary',
-          desc: tx.description || `Cycle #${tx.cycleNumber}`,
+          desc: '',
           status: 'COMPLETED'
         }
       case 'LEVEL_COMMISSION':
         return {
-          title: `Sponsor (L${tx.level})`,
+          title: 'Sponsor',
           amount: `+$${Number(tx.amountUsd).toFixed(2)}`,
           amountClass: 'text-accent',
-          desc: tx.description || (tx.sourceUserId ? `From User: ${tx.sourceUserId.substring(0, 6)}...` : 'Sponsor Bonus'),
+          desc: '',
           status: 'COMPLETED'
         }
       case 'ROI_LEVEL_COMMISSION':
         return {
-          title: `Level (L${tx.level})`,
+          title: 'Level',
           amount: `+$${Number(tx.amountUsd).toFixed(2)}`,
           amountClass: 'text-accent',
-          desc: tx.description || (tx.sourceUserId ? `From User: ${tx.sourceUserId.substring(0, 6)}...` : 'Level Bonus'),
+          desc: '',
           status: 'COMPLETED'
         }
       case 'SALARY':
@@ -204,7 +204,7 @@ export default function HistoryPage() {
           title: `Salary`,
           amount: `+$${Number(tx.amountUsd).toFixed(2)}`,
           amountClass: 'text-fuchsia-600',
-          desc: tx.description || 'Monthly Business Reward',
+          desc: '',
           status: 'COMPLETED'
         }
       default:
@@ -271,8 +271,12 @@ export default function HistoryPage() {
                           <span className="text-xs text-muted-foreground font-medium">
                             {format(new Date(tx.createdAt), 'dd/MM/yyyy')}
                           </span>
-                          <span className="w-1 h-1 rounded-full bg-muted-foreground/50"></span>
-                          <span className="text-xs text-muted-foreground">{details.desc}</span>
+                          {details.desc && (
+                            <>
+                              <span className="w-1 h-1 rounded-full bg-muted-foreground/50"></span>
+                              <span className="text-xs text-muted-foreground">{details.desc}</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

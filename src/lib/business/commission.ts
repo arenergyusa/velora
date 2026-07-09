@@ -1,10 +1,6 @@
 import { prisma } from '@/lib/prisma'
 
-// Default percentages if not set in DB
-const DEFAULT_LEVEL_PCT: Record<number, number> = {
-  1: 12, 2: 9, 3: 6, 4: 3, 5: 3,
-  6: 3, 7: 3, 8: 2, 9: 2, 10: 5
-}
+
 
 /**
  * Distribute 2-level commission upwards when a user deposits/retops
@@ -17,7 +13,7 @@ export async function distributeTopupReferralCommissions(
     // 1. Fetch Referral configs from DB
     const referralConfigs = await prisma.referralConfig.findMany()
     const pctMap = new Map<number, number>()
-    
+
     referralConfigs.forEach(conf => {
       if (conf.isActive) pctMap.set(conf.level, Number(conf.commissionPct))
     })
@@ -45,38 +41,46 @@ export async function distributeTopupReferralCommissions(
 
       const sponsorId: string = currentUserNode.referredBy
       const commissionPct = pctMap.get(level) ?? 0
-      
+
       if (commissionPct > 0) {
         const commissionUsd = (depositAmountUsd * commissionPct) / 100
 
-        // Check if sponsor's ID is active/working and hasn't hit cap
-        const sponsorCycle = await prisma.userCycle.findFirst({
-          where: { userId: sponsorId, status: 'ACTIVE' },
-          orderBy: { cycleNumber: 'desc' }
-        })
+        await prisma.$transaction(async (tx) => {
+          // Check if sponsor's ID is active/working and hasn't hit cap (inside transaction to prevent stale read)
+          const sponsorCycle = await tx.userCycle.findFirst({
+            where: { userId: sponsorId, status: 'ACTIVE' },
+            orderBy: { cycleNumber: 'desc' }
+          })
 
-        if (sponsorCycle) {
+          if (!sponsorCycle) return
+
           // Check if this new commission will exceed their cap
           const currentTotal = Number(sponsorCycle.totalEarned)
           const maxCap = Number(sponsorCycle.maxEarning)
-          
-          let payout = commissionUsd
 
-          if (currentTotal + payout > maxCap) {
-            payout = maxCap - currentTotal
-            
-            // Mark cycle as capped
-            if (payout >= 0) {
-              await prisma.userCycle.update({
-                where: { id: sponsorCycle.id },
-                data: { status: 'CAPPED', cappedAt: new Date() }
-              })
-            }
+          let payout = commissionUsd
+          let cappedStatus = false
+
+          if (currentTotal + payout >= maxCap) {
+            payout = Math.max(0, maxCap - currentTotal)
+            cappedStatus = true
           }
 
           if (payout > 0) {
+            if (cappedStatus) {
+              await tx.userCycle.update({
+                where: { id: sponsorCycle.id },
+                data: { status: 'CAPPED', cappedAt: new Date(), totalEarned: { increment: payout } }
+              })
+            } else {
+              await tx.userCycle.update({
+                where: { id: sponsorCycle.id },
+                data: { totalEarned: { increment: payout } }
+              })
+            }
+
             // Record the earning
-            await prisma.earning.create({
+            await tx.earning.create({
               data: {
                 userId: sponsorId,
                 type: 'LEVEL_COMMISSION', // keeping same enum to display on UI or change to TOPUP_COMMISSION if needed, wait, let's keep LEVEL_COMMISSION
@@ -87,16 +91,14 @@ export async function distributeTopupReferralCommissions(
                 description: `Level ${level} Topup Commission from user ${depositingUserId}`
               }
             })
-
-            // Update sponsor's cycle total
-            await prisma.userCycle.update({
+          } else if (cappedStatus) {
+            // Mark cycle as capped if no new payout can be given
+            await tx.userCycle.update({
               where: { id: sponsorCycle.id },
-              data: {
-                totalEarned: { increment: payout }
-              }
+              data: { status: 'CAPPED', cappedAt: new Date() }
             })
           }
-        }
+        })
       }
 
       currentUserId = sponsorId
@@ -111,22 +113,18 @@ export async function distributeTopupReferralCommissions(
 }
 
 /**
- * Distribute 10-level commission upwards based on ROI earned by a user
+ * Calculate 10-level commission upwards based on ROI earned by a user
+ * Returns an array of payouts to be aggregated by the caller.
  */
-export async function distributeRoiLevelCommissions(
+export async function calculateRoiLevelCommissions(
   earningUserId: string,
-  roiAmountUsd: number
-) {
+  roiAmountUsd: number,
+  pctMap: Map<number, number>
+): Promise<{ uplineId: string; amountUsd: number }[]> {
   try {
-    // 1. Fetch all level configs from DB
-    const levelConfigs = await prisma.levelConfig.findMany()
-    const pctMap = new Map<number, number>()
+    const payouts: { uplineId: string; amountUsd: number }[] = []
     
-    levelConfigs.forEach(conf => {
-      if (conf.isActive) pctMap.set(conf.level, Number(conf.commissionPct))
-    })
-
-    // 2. Start traversing upwards (up to 10 levels)
+    // Start traversing upwards (up to 10 levels)
     let currentUserId: string | null = earningUserId
     let level = 1
 
@@ -141,63 +139,15 @@ export async function distributeRoiLevelCommissions(
         break // Reached the top of the chain
       }
 
+      // FIX: referredBy holds the UUID of the sponsor
       const sponsorId: string = currentUserNode.referredBy
 
-      // Get the commission % for this level
-      const commissionPct = pctMap.get(level) ?? DEFAULT_LEVEL_PCT[level] ?? 0
+      // Get the commission % for this level from DB only
+      const commissionPct = pctMap.get(level) ?? 0
       
       if (commissionPct > 0) {
-        // Here we calculate based on the ROI Amount
         const commissionUsd = (roiAmountUsd * commissionPct) / 100
-
-        // Check if sponsor's ID is active/working and hasn't hit cap
-        const sponsorCycle = await prisma.userCycle.findFirst({
-          where: { userId: sponsorId, status: 'ACTIVE' },
-          orderBy: { cycleNumber: 'desc' }
-        })
-
-        if (sponsorCycle) {
-          // Check if this new commission will exceed their cap
-          const currentTotal = Number(sponsorCycle.totalEarned)
-          const maxCap = Number(sponsorCycle.maxEarning)
-          
-          let payout = commissionUsd
-
-          if (currentTotal + payout > maxCap) {
-            payout = maxCap - currentTotal
-            
-            // Mark cycle as capped
-            if (payout >= 0) {
-              await prisma.userCycle.update({
-                where: { id: sponsorCycle.id },
-                data: { status: 'CAPPED', cappedAt: new Date() }
-              })
-            }
-          }
-
-          if (payout > 0) {
-            // Record the earning
-            await prisma.earning.create({
-              data: {
-                userId: sponsorId,
-                type: 'ROI_LEVEL_COMMISSION',
-                amountUsd: payout,
-                sourceUserId: earningUserId,
-                level: level,
-                cycleNumber: sponsorCycle.cycleNumber,
-                description: `Level ${level} ROI Commission from user ${earningUserId}`
-              }
-            })
-
-            // Update sponsor's cycle total
-            await prisma.userCycle.update({
-              where: { id: sponsorCycle.id },
-              data: {
-                totalEarned: { increment: payout }
-              }
-            })
-          }
-        }
+        payouts.push({ uplineId: sponsorId, amountUsd: commissionUsd })
       }
 
       // Move up to the next level
@@ -205,9 +155,9 @@ export async function distributeRoiLevelCommissions(
       level++
     }
 
-    return true
+    return payouts
   } catch (error) {
-    console.error('Error distributing ROI level commissions:', error)
-    return false
+    console.error('Error calculating ROI level commissions:', error)
+    throw error // Propagate exception instead of swallowing
   }
 }
