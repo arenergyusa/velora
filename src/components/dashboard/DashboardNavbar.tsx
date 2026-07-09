@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, LayoutDashboard, Layers, Users2, ArrowDownCircle, ArrowUpCircle, History, LogOut, Wallet, ShieldCheck } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Layers, Users2, ArrowDownCircle, ArrowUpCircle, History, LogOut, Wallet, ShieldCheck, User as UserIcon } from 'lucide-react';
 import { UniverseLogo } from '@/components/ui/UniverseLogo';
 import { useWallet } from '@/context/WalletContext';
 import { useAuth } from '@/context/AuthContext';
@@ -31,6 +31,7 @@ export default function DashboardNavbar({ userStatus = 'INACTIVE' }: DashboardNa
 
   const navLinks = [
     { name: 'Overview', href: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { name: 'Profile', href: '/dashboard/profile', icon: <UserIcon className="w-4 h-4" /> },
     { name: 'Team', href: '/dashboard/team', icon: <Users2 className="w-4 h-4" /> },
     { name: 'Deposit', href: '/dashboard/deposit', icon: <ArrowDownCircle className="w-4 h-4" /> },
     { name: 'Top-up', href: '/dashboard/topup', icon: <Layers className="w-4 h-4" /> },

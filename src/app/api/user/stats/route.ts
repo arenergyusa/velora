@@ -26,7 +26,8 @@ export async function GET(request: Request) {
       user: {
         id: user.id,
         status: user.status,
-        referralCode: user.referralCode
+        referralCode: user.referralCode,
+        isProfileComplete: !!(user.fullName && user.phone && user.email && user.country && user.state && user.city && user.pinCode)
       },
       stats
     })

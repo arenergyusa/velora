@@ -93,6 +93,32 @@ export default function DashboardClient({ fallbackData, serverAddress }: { fallb
         </div>
       </div>
 
+      {/* Profile Incomplete Alert Banner */}
+      {user.isProfileComplete === false && (
+        <div className="bg-gradient-to-r from-yellow-500/20 via-yellow-500/10 to-transparent border border-yellow-500/30 rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-start space-x-4">
+            <div className="w-12 h-12 rounded-2xl bg-yellow-500/20 flex items-center justify-center text-yellow-500 border border-yellow-500/30 flex-shrink-0">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-foreground">Complete Your Profile</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-xl">
+                Your profile is missing some details. Please set up your profile.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+            <Link
+              href="/dashboard/profile"
+              className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 bg-yellow-500 text-black hover:bg-yellow-400 text-xs font-bold px-5 py-3.5 rounded-xl transition-colors"
+            >
+              <Users className="w-4 h-4" />
+              <span>Setup Profile</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Inactive Alert Banner */}
       {user.status === 'INACTIVE' && (
         <div className="bg-gradient-to-r from-accent/20 via-accent/10 to-transparent border border-accent/30 rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">

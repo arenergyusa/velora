@@ -2,17 +2,22 @@ import React from 'react';
 import Image from 'next/image';
 
 export const UniverseLogo = ({ className = "h-10 w-auto" }: { className?: string }) => (
-  <div className={`flex items-center gap-3 ${className}`}>
+  <div className={`flex items-center gap-0.5 ${className}`}>
     <Image
       src="/og-image.png"
       alt="Velora Logo"
       width={100}
       height={100}
-      className="h-full w-auto object-contain"
+      className="h-full w-auto object-contain drop-shadow-md z-10"
       priority
     />
-    <span className="text-xl md:text-2xl font-black tracking-[0.2em] bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
-      VELORA
-    </span>
+    <Image
+      src="/velora-logo.png"
+      alt="Velora Text"
+      width={120}
+      height={30}
+      className="h-[42%] md:h-[46%] w-auto object-contain opacity-90 brightness-110 contrast-125 translate-y-[2px]"
+      priority
+    />
   </div>
 );

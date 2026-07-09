@@ -13,6 +13,17 @@ model User {
   referredBy    String?
   status        AccountStatus    @default(INACTIVE)
   teamSide      TeamSide?
+  
+  // Profile fields
+  fullName         String?
+  phone            String?
+  phoneCountryCode String?
+  email            String?
+  country          String?
+  state            String?
+  city             String?
+  pinCode          String?
+
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   nonce         String           @default(dbgenerated("gen_random_uuid()::text"))
