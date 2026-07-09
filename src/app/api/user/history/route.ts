@@ -50,7 +50,7 @@ export async function GET(request: Request) {
           }).then(res => res.map(i => ({ ...i, txType: 'INVESTMENT', createdAt: i.startedAt })))
         : Promise.resolve([]),
 
-      (type === 'ALL' || ['ROI', 'LEVEL_COMMISSION', 'SALARY'].includes(type))
+      (type === 'ALL' || ['ROI', 'LEVEL_COMMISSION', 'ROI_LEVEL_COMMISSION', 'SALARY'].includes(type))
         ? prisma.earning.findMany({
             where: { 
               userId: user.id,

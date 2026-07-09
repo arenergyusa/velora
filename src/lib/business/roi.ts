@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { distributeRoiLevelCommissions } from '@/lib/business/commission'
 
 /**
  * Get today's date at UTC midnight
@@ -122,6 +123,13 @@ export async function processDailyROI() {
               createdAt: roiDate // Set the correct date for each day's ROI
             }
           })
+
+          // Give 10-level ROI commission to upline based on this daily ROI payout
+          try {
+            await distributeRoiLevelCommissions(cycle.userId, payout)
+          } catch (e) {
+            console.error('Failed to distribute ROI level commissions', e)
+          }
 
           currentTotal += payout
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { distributeLevelCommissions } from '@/lib/business/commission'
+import { distributeTopupReferralCommissions } from '@/lib/business/commission'
 import { getUserBalance } from '@/lib/business/balance'
 
 export async function POST(request: Request) {
@@ -77,8 +77,8 @@ export async function POST(request: Request) {
       data: { status: 'ACTIVE' }
     })
 
-    // 6. Distribute 10-level commissions upwards
-    await distributeLevelCommissions(userId, amount)
+    // 6. Distribute 2-level commissions upwards
+    await distributeTopupReferralCommissions(userId, amount)
 
     return NextResponse.json({ success: true, cycle: newCycle })
 

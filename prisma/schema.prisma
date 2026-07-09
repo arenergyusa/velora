@@ -151,7 +151,16 @@ enum TxStatus {
 enum EarningType {
   ROI
   LEVEL_COMMISSION
+  ROI_LEVEL_COMMISSION
   SALARY
+}
+
+model ReferralConfig {
+  id            String   @id @default(uuid())
+  level         Int      @unique
+  commissionPct Decimal
+  isActive      Boolean  @default(true)
+  updatedAt     DateTime @updatedAt
 }
 
 model ContactMessage {

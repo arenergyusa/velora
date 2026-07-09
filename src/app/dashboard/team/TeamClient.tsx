@@ -4,6 +4,7 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import { GitCommitVertical, BadgePercent, RefreshCw, Users, UserCheck, DollarSign, Wallet, ChevronDown, ChevronUp } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { format } from 'date-fns'
 
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
@@ -278,7 +279,7 @@ export default function TeamClient({ fallbackData, serverAddress }: { fallbackDa
                                   <p className="text-sm font-mono font-medium text-foreground">
                                     {member.address.slice(0, 6)}...{member.address.slice(-4)}
                                   </p>
-                                  <p className="text-xs text-muted-foreground">Joined: {new Date(member.joinedAt).toLocaleDateString()}</p>
+                                  <p className="text-xs text-muted-foreground">Joined: {format(new Date(member.joinedAt), 'dd/MM/yyyy')}</p>
                                 </div>
                                 <div className="mt-2 sm:mt-0 flex gap-6 text-right">
                                   <div>

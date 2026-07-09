@@ -18,7 +18,7 @@ async function main() {
   }
 
   // 2. Seed Level Commission Configurations
-  const levelPcts = [12, 9, 6, 3, 3, 3, 3, 2, 2, 5]
+  const levelPcts = [12, 10, 6, 3, 3, 3, 3, 2, 2, 4]
 
   for (let i = 0; i < levelPcts.length; i++) {
     await prisma.levelConfig.upsert({

@@ -5,7 +5,7 @@ import { ArrowDownToLine, ArrowUpFromLine, RefreshCw, Layers, Gift, Activity, Se
 import { useAuth } from '@/context/AuthContext'
 import { format } from 'date-fns'
 
-type TabType = 'ALL' | 'DEPOSITS' | 'WITHDRAWALS' | 'INVESTMENTS' | 'ROI' | 'LEVEL_COMMISSION' | 'SALARY'
+type TabType = 'ALL' | 'DEPOSITS' | 'WITHDRAWALS' | 'INVESTMENTS' | 'ROI' | 'LEVEL_COMMISSION' | 'ROI_LEVEL_COMMISSION' | 'SALARY'
 
 interface Transaction {
   id: string
@@ -131,7 +131,8 @@ export default function HistoryPage() {
     { id: 'WITHDRAWALS', label: 'Withdrawals' },
     { id: 'INVESTMENTS', label: 'Top-up' },
     { id: 'ROI', label: 'ROI' },
-    { id: 'LEVEL_COMMISSION', label: 'Level' },
+    { id: 'LEVEL_COMMISSION', label: 'Sponsor' },
+    { id: 'ROI_LEVEL_COMMISSION', label: 'Level' },
     { id: 'SALARY', label: 'Salary' },
   ]
 
@@ -141,7 +142,8 @@ export default function HistoryPage() {
       case 'WITHDRAWAL': return <ArrowUpFromLine className="w-5 h-5 text-destructive" />
       case 'INVESTMENT': return <Layers className="w-5 h-5 text-primary" />
       case 'ROI': return <Activity className="w-5 h-5 text-primary" />
-      case 'LEVEL_COMMISSION': return <Gift className="w-5 h-5 text-accent" />
+      case 'LEVEL_COMMISSION':
+      case 'ROI_LEVEL_COMMISSION': return <Gift className="w-5 h-5 text-accent" />
       case 'SALARY': return <Gift className="w-5 h-5 text-fuchsia-500" />
       default: return <Activity className="w-5 h-5 text-muted-foreground" />
     }
@@ -154,7 +156,7 @@ export default function HistoryPage() {
           title: 'Deposit',
           amount: `+$${Number(tx.amountUsd).toFixed(2)}`,
           amountClass: 'text-primary',
-          desc: `TRX Equivalent: ${Number(tx.amountTrx).toFixed(2)} TRX`,
+          desc: `TRX: ${Number(tx.amountTrx).toFixed(2)} TRX`,
           status: tx.status
         }
       case 'WITHDRAWAL':
@@ -183,7 +185,15 @@ export default function HistoryPage() {
         }
       case 'LEVEL_COMMISSION':
         return {
-          title: `Level ${tx.level} Income`,
+          title: `Sponsor (L${tx.level})`,
+          amount: `+$${Number(tx.amountUsd).toFixed(2)}`,
+          amountClass: 'text-accent',
+          desc: tx.description || (tx.sourceUserId ? `From User: ${tx.sourceUserId.substring(0, 6)}...` : 'Sponsor Bonus'),
+          status: 'COMPLETED'
+        }
+      case 'ROI_LEVEL_COMMISSION':
+        return {
+          title: `Level (L${tx.level})`,
           amount: `+$${Number(tx.amountUsd).toFixed(2)}`,
           amountClass: 'text-accent',
           desc: tx.description || (tx.sourceUserId ? `From User: ${tx.sourceUserId.substring(0, 6)}...` : 'Level Bonus'),
@@ -259,7 +269,7 @@ export default function HistoryPage() {
                         <h4 className="text-foreground font-bold text-base">{details.title}</h4>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs text-muted-foreground font-medium">
-                            {format(new Date(tx.createdAt), 'MMM dd, yyyy • hh:mm a')}
+                            {format(new Date(tx.createdAt), 'dd/MM/yyyy')}
                           </span>
                           <span className="w-1 h-1 rounded-full bg-muted-foreground/50"></span>
                           <span className="text-xs text-muted-foreground">{details.desc}</span>

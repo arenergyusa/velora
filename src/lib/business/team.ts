@@ -21,7 +21,7 @@ export async function getTeamBusiness(userId: string) {
     prisma.earning.aggregate({
       where: {
         userId,
-        type: { in: ['LEVEL_COMMISSION'] }
+        type: { in: ['LEVEL_COMMISSION', 'ROI_LEVEL_COMMISSION'] }
       },
       _sum: {
         amountUsd: true
